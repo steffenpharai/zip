@@ -1,0 +1,88 @@
+Traceback (most recent call last):
+  File "C:\Users\phara\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\click\core.py", line 1873, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+                           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\phara\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\click\core.py", line 1269, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\phara\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\click\core.py", line 824, in invoke
+    return callback(*args, **kwargs)
+  File "C:\Users\phara\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\click\decorators.py", line 34, in new_func
+    return f(get_current_context(), *args, **kwargs)
+  File "C:\Users\phara\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\esptool\__init__.py", line 1040, in read_flash_cli
+    read_flash(ctx.obj["esp"], address, size, output, **kwargs)
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\phara\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\esptool\cmds.py", line 2162, in read_flash
+    data = esp.read_flash(address, size, flash_progress)
+  File "C:\Users\phara\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\esptool\loader.py", line 1579, in read_flash
+    p = self.read()
+  File "C:\Users\phara\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\esptool\loader.py", line 503, in read
+    return next(self._slip_reader)
+  File "C:\Users\phara\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\esptool\loader.py", line 2172, in slip_reader
+    raise FatalError(msg)
+esptool.util.FatalError: Packet content transfer stopped 
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\phara\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\esptool\__init__.py", line 1362, in _main
+    main()
+    ~~~~^^
+  File "C:\Users\phara\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\esptool\__init__.py", line 1256, in main
+    cli(args=args, esp=esp)
+    ~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\phara\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\esptool\cli_util.py", line 346, in __call__
+    return super().__call__(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\phara\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rich_click\rich_command.py", line 402, in __call__
+    return super().__call__(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\phara\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\click\core.py", line 1485, in __call__
+    return self.main(*args, **kwargs)
+           ~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\phara\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\rich_click\rich_command.py", line 216, in main
+    rv = self.invoke(ctx)
+  File "C:\Users\phara\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\click\core.py", line 1872, in invoke
+    with sub_ctx:
+         ^^^^^^^
+  File "C:\Users\phara\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\click\core.py", line 490, in __exit__
+    exit_result = self._close_with_exception_info(exc_type, exc_value, tb)
+  File "C:\Users\phara\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\click\core.py", line 635, in _close_with_exception_info
+    exit_result = self._exit_stack.__exit__(exc_type, exc_value, tb)
+  File "C:\Users\phara\AppData\Local\Python\pythoncore-3.14-64\Lib\contextlib.py", line 619, in __exit__
+    raise exc
+  File "C:\Users\phara\AppData\Local\Python\pythoncore-3.14-64\Lib\contextlib.py", line 604, in __exit__
+    if cb(*exc_details):
+       ~~^^^^^^^^^^^^^^
+  File "C:\Users\phara\AppData\Local\Python\pythoncore-3.14-64\Lib\contextlib.py", line 482, in _exit_wrapper
+    callback(*args, **kwds)
+    ~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\phara\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\esptool\__init__.py", line 639, in teardown
+    reset_chip(esp, ctx.obj["after"])
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\phara\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\esptool\cmds.py", line 2451, in reset_chip
+    esp.soft_reset(True)  # Exit the stub flasher back to ROM loader
+    ~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\phara\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\esptool\loader.py", line 2076, in soft_reset
+    self.flash_begin(0, 0)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\phara\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\esptool\loader.py", line 1092, in flash_begin
+    self.check_command(
+    ~~~~~~~~~~~~~~~~~~^
+        "enter flash download mode",
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<2 lines>...
+        timeout=timeout,
+        ^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\phara\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\esptool\loader.py", line 637, in check_command
+    val, data = self.command(op, data, chk, timeout=timeout)
+                ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\phara\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\esptool\loader.py", line 567, in command
+    p = self.read()
+  File "C:\Users\phara\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\esptool\loader.py", line 503, in read
+    return next(self._slip_reader)
+StopIteration
+
+A fatal error occurred: The chip stopped responding.

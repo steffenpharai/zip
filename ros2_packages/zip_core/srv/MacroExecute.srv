@@ -1,0 +1,9 @@
+# Macro Execute Service
+# Execute a predefined motion macro
+
+uint8 macro_id  # 1=FIGURE_8, 2=SPIN_360, 3=WIGGLE, 4=FORWARD_THEN_STOP
+uint8 intensity  # Intensity (0-255)
+uint16 ttl_ms  # Time-to-live in milliseconds (1000-10000)
+---
+bool success
+string message

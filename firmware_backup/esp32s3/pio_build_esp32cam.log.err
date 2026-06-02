@@ -1,0 +1,383 @@
+In file included from C:/Users/phara/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/include/freertos/include/esp_additions/freertos/FreeRTOSConfig.h:10,
+                 from C:/Users/phara/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/include/freertos/include/freertos/FreeRTOS.h:57,
+                 from src/app/task_architecture.h:28,
+                 from src/app/task_architecture.cpp:7:
+C:/Users/phara/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/qio_opi/include/sdkconfig.h:482: warning: "CONFIG_LOG_DEFAULT_LEVEL" redefined
+ #define CONFIG_LOG_DEFAULT_LEVEL 1
+ 
+<command-line>: note: this is the location of the previous definition
+In file included from C:/Users/phara/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/include/freertos/include/esp_additions/freertos/FreeRTOSConfig.h:10,
+                 from C:/Users/phara/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/include/freertos/include/freertos/FreeRTOS.h:57,
+                 from src/app/task_architecture.h:28,
+                 from src/app/task_architecture.cpp:7:
+C:/Users/phara/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/qio_opi/include/sdkconfig.h:484: warning: "CONFIG_LOG_MAXIMUM_LEVEL" redefined
+ #define CONFIG_LOG_MAXIMUM_LEVEL 1
+ 
+<command-line>: note: this is the location of the previous definition
+In file included from C:/Users/phara/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/include/esp_common/include/esp_attr.h:14,
+                 from include/config/safe_mode.h:13,
+                 from src/config/safe_mode.cpp:7:
+C:/Users/phara/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/qio_opi/include/sdkconfig.h:482: warning: "CONFIG_LOG_DEFAULT_LEVEL" redefined
+ #define CONFIG_LOG_DEFAULT_LEVEL 1
+ 
+<command-line>: note: this is the location of the previous definition
+In file included from C:/Users/phara/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/include/esp_common/include/esp_attr.h:14,
+                 from include/config/safe_mode.h:13,
+                 from src/config/safe_mode.cpp:7:
+C:/Users/phara/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/qio_opi/include/sdkconfig.h:484: warning: "CONFIG_LOG_MAXIMUM_LEVEL" redefined
+ #define CONFIG_LOG_MAXIMUM_LEVEL 1
+ 
+<command-line>: note: this is the location of the previous definition
+C:\Users\phara\.platformio\packages\tool-esptoolpy\esptool\cmds.py:152: SyntaxWarning: 'return' in a 'finally' block
+  return inst
+In file included from C:/Users/phara/.platformio/packages/framework-arduinoespressif32/cores/esp32/USB.h:16,
+                 from C:/Users/phara/.platformio/packages/framework-arduinoespressif32/cores/esp32/HWCDC.cpp:14:
+C:/Users/phara/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/qio_opi/include/sdkconfig.h:482: warning: "CONFIG_LOG_DEFAULT_LEVEL" redefined
+ #define CONFIG_LOG_DEFAULT_LEVEL 1
+ 
+<command-line>: note: this is the location of the previous definition
+In file included from C:/Users/phara/.platformio/packages/framework-arduinoespressif32/cores/esp32/USB.h:16,
+                 from C:/Users/phara/.platformio/packages/framework-arduinoespressif32/cores/esp32/HWCDC.cpp:14:
+C:/Users/phara/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/qio_opi/include/sdkconfig.h:484: warning: "CONFIG_LOG_MAXIMUM_LEVEL" redefined
+ #define CONFIG_LOG_MAXIMUM_LEVEL 1
+ 
+<command-line>: note: this is the location of the previous definition
+In file included from C:/Users/phara/.platformio/packages/framework-arduinoespressif32/cores/esp32/USBMSC.h:18,
+                 from C:/Users/phara/.platformio/packages/framework-arduinoespressif32/cores/esp32/FirmwareMSC.h:17,
+                 from C:/Users/phara/.platformio/packages/framework-arduinoespressif32/cores/esp32/FirmwareMSC.cpp:14:
+C:/Users/phara/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/qio_opi/include/sdkconfig.h:482: warning: "CONFIG_LOG_DEFAULT_LEVEL" redefined
+ #define CONFIG_LOG_DEFAULT_LEVEL 1
+ 
+<command-line>: note: this is the location of the previous definition
+In file included from C:/Users/phara/.platformio/packages/framework-arduinoespressif32/cores/esp32/USBMSC.h:18,
+                 from C:/Users/phara/.platformio/packages/framework-arduinoespressif32/cores/esp32/FirmwareMSC.h:17,
+                 from C:/Users/phara/.platformio/packages/framework-arduinoespressif32/cores/esp32/FirmwareMSC.cpp:14:
+C:/Users/phara/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/qio_opi/include/sdkconfig.h:484: warning: "CONFIG_LOG_MAXIMUM_LEVEL" redefined
+ #define CONFIG_LOG_MAXIMUM_LEVEL 1
+ 
+<command-line>: note: this is the location of the previous definition
+In file included from C:/Users/phara/.platformio/packages/framework-arduinoespressif32/cores/esp32/USB.h:16,
+                 from C:/Users/phara/.platformio/packages/framework-arduinoespressif32/cores/esp32/USB.cpp:14:
+C:/Users/phara/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/qio_opi/include/sdkconfig.h:482: warning: "CONFIG_LOG_DEFAULT_LEVEL" redefined
+ #define CONFIG_LOG_DEFAULT_LEVEL 1
+ 
+<command-line>: note: this is the location of the previous definition
+In file included from C:/Users/phara/.platformio/packages/framework-arduinoespressif32/cores/esp32/USB.h:16,
+                 from C:/Users/phara/.platformio/packages/framework-arduinoespressif32/cores/esp32/USB.cpp:14:
+C:/Users/phara/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/qio_opi/include/sdkconfig.h:484: warning: "CONFIG_LOG_MAXIMUM_LEVEL" redefined
+ #define CONFIG_LOG_MAXIMUM_LEVEL 1
+ 
+<command-line>: note: this is the location of the previous definition
+In file included from C:/Users/phara/.platformio/packages/framework-arduinoespressif32/cores/esp32/USB.h:16,
+                 from C:/Users/phara/.platformio/packages/framework-arduinoespressif32/cores/esp32/USBCDC.cpp:14:
+C:/Users/phara/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/qio_opi/include/sdkconfig.h:482: warning: "CONFIG_LOG_DEFAULT_LEVEL" redefined
+ #define CONFIG_LOG_DEFAULT_LEVEL 1
+ 
+<command-line>: note: this is the location of the previous definition
+In file included from C:/Users/phara/.platformio/packages/framework-arduinoespressif32/cores/esp32/USB.h:16,
+                 from C:/Users/phara/.platformio/packages/framework-arduinoespressif32/cores/esp32/USBCDC.cpp:14:
+C:/Users/phara/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/qio_opi/include/sdkconfig.h:484: warning: "CONFIG_LOG_MAXIMUM_LEVEL" redefined
+ #define CONFIG_LOG_MAXIMUM_LEVEL 1
+ 
+<command-line>: note: this is the location of the previous definition
+In file included from C:/Users/phara/.platformio/packages/framework-arduinoespressif32/cores/esp32/USBMSC.h:18,
+                 from C:/Users/phara/.platformio/packages/framework-arduinoespressif32/cores/esp32/USBMSC.cpp:14:
+C:/Users/phara/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/qio_opi/include/sdkconfig.h:482: warning: "CONFIG_LOG_DEFAULT_LEVEL" redefined
+ #define CONFIG_LOG_DEFAULT_LEVEL 1
+ 
+<command-line>: note: this is the location of the previous definition
+In file included from C:/Users/phara/.platformio/packages/framework-arduinoespressif32/cores/esp32/USBMSC.h:18,
+                 from C:/Users/phara/.platformio/packages/framework-arduinoespressif32/cores/esp32/USBMSC.cpp:14:
+C:/Users/phara/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/qio_opi/include/sdkconfig.h:484: warning: "CONFIG_LOG_MAXIMUM_LEVEL" redefined
+ #define CONFIG_LOG_MAXIMUM_LEVEL 1
+ 
+<command-line>: note: this is the location of the previous definition
+In file included from C:/Users/phara/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-cpu.c:15:
+C:/Users/phara/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/qio_opi/include/sdkconfig.h:482: warning: "CONFIG_LOG_DEFAULT_LEVEL" redefined
+ #define CONFIG_LOG_DEFAULT_LEVEL 1
+ 
+<command-line>: note: this is the location of the previous definition
+In file included from C:/Users/phara/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-cpu.c:15:
+C:/Users/phara/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/qio_opi/include/sdkconfig.h:484: warning: "CONFIG_LOG_MAXIMUM_LEVEL" redefined
+ #define CONFIG_LOG_MAXIMUM_LEVEL 1
+ 
+<command-line>: note: this is the location of the previous definition
+In file included from C:/Users/phara/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-misc.c:15:
+C:/Users/phara/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/qio_opi/include/sdkconfig.h:482: warning: "CONFIG_LOG_DEFAULT_LEVEL" redefined
+ #define CONFIG_LOG_DEFAULT_LEVEL 1
+ 
+<command-line>: note: this is the location of the previous definition
+In file included from C:/Users/phara/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-misc.c:15:
+C:/Users/phara/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/qio_opi/include/sdkconfig.h:484: warning: "CONFIG_LOG_MAXIMUM_LEVEL" redefined
+ #define CONFIG_LOG_MAXIMUM_LEVEL 1
+ 
+<command-line>: note: this is the location of the previous definition
+In file included from C:/Users/phara/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-spi.h:22,
+                 from C:/Users/phara/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-spi.c:15:
+C:/Users/phara/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/qio_opi/include/sdkconfig.h:482: warning: "CONFIG_LOG_DEFAULT_LEVEL" redefined
+ #define CONFIG_LOG_DEFAULT_LEVEL 1
+ 
+<command-line>: note: this is the location of the previous definition
+In file included from C:/Users/phara/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-spi.h:22,
+                 from C:/Users/phara/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-spi.c:15:
+C:/Users/phara/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/qio_opi/include/sdkconfig.h:484: warning: "CONFIG_LOG_MAXIMUM_LEVEL" redefined
+ #define CONFIG_LOG_MAXIMUM_LEVEL 1
+ 
+<command-line>: note: this is the location of the previous definition
+In file included from C:/Users/phara/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-tinyusb.c:2:
+C:/Users/phara/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/qio_opi/include/sdkconfig.h:482: warning: "CONFIG_LOG_DEFAULT_LEVEL" redefined
+ #define CONFIG_LOG_DEFAULT_LEVEL 1
+ 
+<command-line>: note: this is the location of the previous definition
+In file included from C:/Users/phara/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-tinyusb.c:2:
+C:/Users/phara/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/qio_opi/include/sdkconfig.h:484: warning: "CONFIG_LOG_MAXIMUM_LEVEL" redefined
+ #define CONFIG_LOG_MAXIMUM_LEVEL 1
+ 
+<command-line>: note: this is the location of the previous definition
+In file included from C:/Users/phara/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/include/freertos/include/esp_additions/freertos/FreeRTOSConfig.h:10,
+                 from C:/Users/phara/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/include/freertos/include/freertos/FreeRTOS.h:57,
+                 from C:/Users/phara/.platformio/packages/framework-arduinoespressif32/cores/esp32/main.cpp:1:
+C:/Users/phara/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/qio_opi/include/sdkconfig.h:482: warning: "CONFIG_LOG_DEFAULT_LEVEL" redefined
+ #define CONFIG_LOG_DEFAULT_LEVEL 1
+ 
+<command-line>: note: this is the location of the previous definition
+In file included from C:/Users/phara/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/include/freertos/include/esp_additions/freertos/FreeRTOSConfig.h:10,
+                 from C:/Users/phara/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/include/freertos/include/freertos/FreeRTOS.h:57,
+                 from C:/Users/phara/.platformio/packages/framework-arduinoespressif32/cores/esp32/main.cpp:1:
+C:/Users/phara/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/qio_opi/include/sdkconfig.h:484: warning: "CONFIG_LOG_MAXIMUM_LEVEL" redefined
+ #define CONFIG_LOG_MAXIMUM_LEVEL 1
+ 
+<command-line>: note: this is the location of the previous definition
+C:/Users/phara/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-uart.c: In function 'uartSetPins':
+C:/Users/phara/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-uart.c:153:9: warning: 'return' with no value, in function returning non-void
+         return;
+         ^~~~~~
+C:/Users/phara/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-uart.c:149:6: note: declared here
+ bool uartSetPins(uint8_t uart_num, int8_t rxPin, int8_t txPin, int8_t ctsPin, int8_t rtsPin)
+      ^~~~~~~~~~~
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\app\app_main.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\app\app_main.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\app\app_main.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\app\app_main.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\app\app_main.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\app\app_main.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\app\app_main.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\app\app_main.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\app\app_main.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\app\task_architecture.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\drivers\camera\camera_service.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\drivers\uart\uart_bridge.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\net\net_service.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\web\web_server.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\app\app_main.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\net\net_service.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\app\app_main.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\net\net_service.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\app\app_main.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\app\task_architecture.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\drivers\camera\camera_service.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\drivers\uart\uart_bridge.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\net\net_service.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\web\web_server.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\app\app_main.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\app\task_architecture.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\drivers\camera\camera_service.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\drivers\uart\uart_bridge.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\net\net_service.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\web\web_server.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\app\app_main.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\app\app_main.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\app\app_main.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\app\app_main.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\app\app_main.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\app\app_main.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\app\app_main.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\app\app_main.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\app\app_main.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\app\task_architecture.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\drivers\camera\camera_service.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\drivers\uart\uart_bridge.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\net\net_service.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\web\web_server.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\app\app_main.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\net\net_service.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\app\app_main.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\net\net_service.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\app\app_main.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\app\task_architecture.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\drivers\camera\camera_service.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\drivers\uart\uart_bridge.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\net\net_service.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\web\web_server.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\app\app_main.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\app\task_architecture.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\drivers\camera\camera_service.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\drivers\uart\uart_bridge.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\net\net_service.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\web\web_server.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\app\app_main.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\app\task_architecture.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\drivers\camera\camera_service.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\drivers\uart\uart_bridge.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\net\net_service.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\web\web_server.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\app\app_main.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\app\task_architecture.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\drivers\camera\camera_service.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\drivers\uart\uart_bridge.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\net\net_service.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\web\web_server.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\app\app_main.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\app\task_architecture.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\drivers\camera\camera_service.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\drivers\uart\uart_bridge.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\net\net_service.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\web\web_server.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\app\app_main.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\app\task_architecture.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\drivers\camera\camera_service.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\drivers\uart\uart_bridge.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\net\net_service.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\web\web_server.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\app\app_main.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\app\task_architecture.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\drivers\camera\camera_service.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\drivers\uart\uart_bridge.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\net\net_service.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\web\web_server.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\app\app_main.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\app\task_architecture.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\drivers\camera\camera_service.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\drivers\uart\uart_bridge.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\net\net_service.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\web\web_server.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\app\app_main.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\app\app_main.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\app\task_architecture.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\app\task_architecture.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\drivers\camera\camera_service.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\drivers\camera\camera_service.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\drivers\uart\uart_bridge.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\drivers\uart\uart_bridge.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\net\net_service.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\net\net_service.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\web\web_server.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\web\web_server.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: reopening .pio\build\esp32cam\src\app\app_main.cpp.o: No such file or directory
+
+c:/users/phara/.platformio/packages/toolchain-xtensa-esp32s3/bin/../lib/gcc/xtensa-esp32s3-elf/8.4.0/../../../../xtensa-esp32s3-elf/bin/ld.exe: can't relax section: No such file or directory
+collect2.exe: error: ld returned 1 exit status
+*** [.pio\build\esp32cam\firmware.elf] Error 1
+========================= [FAILED] Took 121.36 seconds =========================
+Environment    Status    Duration
+-------------  --------  ------------
+esp32cam       FAILED    00:02:01.359
+==================== 1 failed, 0 succeeded in 00:02:01.359 ====================

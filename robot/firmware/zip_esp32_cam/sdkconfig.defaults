@@ -1,0 +1,18 @@
+# ESP32-S3 WiFi Power Brownout Fix
+# Increase Interrupt Watchdog Timer timeout to allow WiFi radio calibration
+# WiFi radio requires ~500mA current burst during initialization
+# USB power may cause voltage dips that take longer than default IWDT timeout
+
+# Increase Interrupt Watchdog Timer timeout to 3000ms (default is ~300-800ms)
+# This allows more time for radio calibration during esp_wifi_init()
+CONFIG_ESP_INT_WDT_TIMEOUT_MS=3000
+
+# Increase Task Watchdog Timer timeout to 10s (default is 5s)
+CONFIG_ESP_TASK_WDT_TIMEOUT_S=10
+
+# Reduce WiFi power consumption during initialization
+# This may help reduce current spike during radio calibration
+CONFIG_ESP32_WIFI_STATIC_RX_BUFFER_NUM=5
+CONFIG_ESP32_WIFI_DYNAMIC_RX_BUFFER_NUM=5
+CONFIG_ESP32_WIFI_DYNAMIC_TX_BUFFER_NUM=5
+

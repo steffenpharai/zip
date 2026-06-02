@@ -1,0 +1,16 @@
+esptool.py v4.8.1
+Serial port COM4
+Connecting...
+Chip is ESP32-S3 (QFN56) (revision v0.2)
+Features: WiFi, BLE, Embedded PSRAM 8MB (AP_3v3)
+Crystal is 40MHz
+MAC: fc:01:2c:c7:92:a8
+Uploading stub...
+Running stub...
+Stub running...
+Manufacturer: 20
+Device: 4017
+Detected flash size: 8MB
+Flash type set in eFuse: quad (4 data lines)
+Flash voltage set by eFuse to 3.3V
+Hard resetting via RTS pin...

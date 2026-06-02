@@ -1,0 +1,83 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pkg-cache
+/.next
+/out
+
+# testing
+/coverage
+/playwright-report
+/test-results
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# local env files
+.env*.local
+.env
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# artifacts
+/artifacts
+
+# data files
+data/*.db
+data/*.log
+data/traces/*.jsonl
+!data/.gitkeep
+
+# generated VRM analysis files
+vrm_*.json
+vrm_*.txt
+
+# Cursor IDE files
+.cursor/
+.cursorrules
+
+# temporary documentation files
+head.md
+TEST_RESULTS.md
+
+# ELEGOO SDK reference (keep locally, don't commit)
+robot/ELEGOO*/
+
+# Runtime logs
+/logs/
+
+# PlatformIO build artifacts (firmware)
+robot/firmware/*/.pio/
+robot/firmware/*/.vscode/
+
+# Robot bridge build artifacts
+robot/bridge/*/dist/
+robot/bridge/*/node_modules/
+robot/bridge/*/data/
+
+# VRM debug captures
+docs/VRM-registry-capture.json
+
+# Old avatar server (liveportrait/wav2lip) - not used
+/services/
+
+
+# YOLOE model files (too large for git)
+*.pt
+*.onnx
+*.engine
+ros2_packages/zip_vision/models/**/*.pt
+ros2_packages/zip_vision/models/**/*.onnx
+ros2_packages/zip_vision/models/**/*.engine

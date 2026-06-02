@@ -1,0 +1,87 @@
+# Cursor IDE Indexing Exclusions
+# Optimized for Jetson Orin Nano 8GB - reduces memory usage
+
+# Dependencies
+node_modules/
+.pkg-cache/
+.next/
+out/
+dist/
+
+# Build artifacts
+*.tsbuildinfo
+*.o
+*.so
+*.a
+*.bin
+*.elf
+*.hex
+
+# ROS 2 build directories
+**/build/
+**/install/
+**/log/
+**/.ros/
+
+# PlatformIO build artifacts
+**/.pio/
+**/.vscode/
+
+# Docker volumes and caches
+**/docker-compose.override.yml
+
+# Large data files
+data/traces/
+data/*.db
+data/*.log
+*.jsonl
+*.log
+
+# Large documentation/reference files
+ELEGOO Smart Robot Car Kit V4.0 2023.02.01/
+**/ELEGOO*/
+
+# Model files (can be very large)
+models/
+*.pt
+*.onnx
+*.engine
+*.trt
+*.bin
+*.safetensors
+*.gguf
+*.ggml
+
+# Generated files
+coverage/
+playwright-report/
+test-results/
+artifacts/
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# Binary files
+*.vrm
+*.zip
+*.tar.gz
+*.deb
+*.rpm
+
+# Cache directories
+.cache/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# ROS 2 specific
+**/colcon_ws/
+**/ros2_ws/build/
+**/ros2_ws/install/
+**/ros2_ws/log/

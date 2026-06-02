@@ -1,0 +1,3 @@
+
+A fatal error occurred: Failed to connect to ESP32-S3: No serial data received.
+For troubleshooting steps visit: https://docs.espressif.com/projects/esptool/en/latest/troubleshooting.html

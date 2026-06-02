@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Robot Control Interface</title>
+  <link rel="stylesheet" href="/css/control-ui.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <h1>Robot Control Interface</h1>
+        <div class="connection-status" id="connectionStatus">
+          <span class="status-indicator" id="statusIndicator"></span>
+          <span class="status-text" id="statusText">Disconnected</span>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="robot-info" id="robotInfo">
+          <span class="info-label">Robot:</span>
+          <span class="info-value" id="robotInfoText">Not connected</span>
+        </div>
+        <button class="btn btn-danger btn-estop" id="eStopBtn">E-STOP</button>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Run Mode Panel -->
+      <div class="panel panel-run-mode">
+        <h2>Run Mode</h2>
+        
+        <!-- Mode Selection -->
+        <div class="control-group">
+          <label>Operating Mode</label>
+          <select id="modeSelect" class="control-select">
+            <option value="0">STANDBY</option>
+            <option value="1" selected>MANUAL</option>
+            <option value="2">LINE_FOLLOW</option>
+            <option value="3">OBSTACLE_AVOID</option>
+            <option value="4">FOLLOW</option>
+          </select>
+        </div>
+
+        <!-- Movement Controls -->
+        <div class="control-section">
+          <h3>Movement</h3>
+          
+          <!-- Tank Drive -->
+          <div class="control-group">
+            <label>Tank Drive</label>
+            <div class="tank-controls">
+              <div class="tank-control">
+                <label>Left: <span id="tankLeftValue">0</span></label>
+                <input type="range" id="tankLeft" min="-255" max="255" value="0" class="control-slider">
+              </div>
+              <div class="tank-control">
+                <label>Right: <span id="tankRightValue">0</span></label>
+                <input type="range" id="tankRight" min="-255" max="255" value="0" class="control-slider">
+              </div>
+            </div>
+            <button class="btn btn-primary" id="tankDriveBtn">Send Tank Drive</button>
+          </div>
+
+          <!-- Twist Drive -->
+          <div class="control-group">
+            <label>Twist Drive</label>
+            <div class="twist-controls">
+              <div class="twist-control">
+                <label>Linear (v): <span id="twistVValue">0</span></label>
+                <input type="range" id="twistV" min="-255" max="255" value="0" class="control-slider">
+              </div>
+              <div class="twist-control">
+                <label>Angular (ω): <span id="twistOmegaValue">0</span></label>
+                <input type="range" id="twistOmega" min="-255" max="255" value="0" class="control-slider">
+              </div>
+            </div>
+            <button class="btn btn-primary" id="twistDriveBtn">Send Twist Drive</button>
+          </div>
+
+          <!-- Preset Movements -->
+          <div class="control-group">
+            <label>Preset Movements</label>
+            <div class="preset-buttons">
+              <button class="btn btn-secondary" id="presetForward">Forward</button>
+              <button class="btn btn-secondary" id="presetBackward">Backward</button>
+              <button class="btn btn-secondary" id="presetLeft">Left</button>
+              <button class="btn btn-secondary" id="presetRight">Right</button>
+              <button class="btn btn-secondary" id="presetStop">Stop</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Servo Control -->
+        <div class="control-section">
+          <h3>Servo</h3>
+          <div class="control-group">
+            <label>Angle: <span id="servoAngleValue">90</span>°</label>
+            <input type="range" id="servoAngle" min="0" max="180" value="90" class="control-slider">
+            <div class="preset-buttons">
+              <button class="btn btn-secondary" id="servoLeft">Left (0°)</button>
+              <button class="btn btn-secondary" id="servoCenter">Center (90°)</button>
+              <button class="btn btn-secondary" id="servoRight">Right (180°)</button>
+            </div>
+            <button class="btn btn-primary" id="servoSendBtn">Set Servo</button>
+          </div>
+        </div>
+
+        <!-- LED Control -->
+        <div class="control-section">
+          <h3>LED</h3>
+          <div class="control-group">
+            <label>Color</label>
+            <div class="led-controls">
+              <div class="led-color">
+                <label>R: <span id="ledRValue">0</span></label>
+                <input type="range" id="ledR" min="0" max="255" value="0" class="control-slider">
+              </div>
+              <div class="led-color">
+                <label>G: <span id="ledGValue">0</span></label>
+                <input type="range" id="ledG" min="0" max="255" value="0" class="control-slider">
+              </div>
+              <div class="led-color">
+                <label>B: <span id="ledBValue">0</span></label>
+                <input type="range" id="ledB" min="0" max="255" value="0" class="control-slider">
+              </div>
+              <div class="led-color">
+                <label>Brightness: <span id="ledBrightnessValue">255</span></label>
+                <input type="range" id="ledBrightness" min="0" max="255" value="255" class="control-slider">
+              </div>
+            </div>
+            <div class="preset-buttons">
+              <button class="btn btn-secondary" id="ledRed">Red</button>
+              <button class="btn btn-secondary" id="ledGreen">Green</button>
+              <button class="btn btn-secondary" id="ledBlue">Blue</button>
+              <button class="btn btn-secondary" id="ledCyan">Cyan</button>
+              <button class="btn btn-secondary" id="ledOff">Off</button>
+            </div>
+            <button class="btn btn-primary" id="ledSendBtn">Set LED</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Diagnostics Panel -->
+      <div class="panel panel-diagnostics">
+        <h2>Diagnostics</h2>
+        
+        <!-- Telemetry Charts -->
+        <div class="diagnostics-section">
+          <h3>Telemetry</h3>
+          
+          <!-- IMU Charts -->
+          <div class="chart-group">
+            <h4>IMU - Accelerometer</h4>
+            <canvas id="imuAccelChart"></canvas>
+          </div>
+          
+          <div class="chart-group">
+            <h4>IMU - Gyroscope</h4>
+            <canvas id="imuGyroChart"></canvas>
+          </div>
+          
+          <div class="chart-group">
+            <h4>IMU - Yaw</h4>
+            <canvas id="imuYawChart"></canvas>
+          </div>
+          
+          <!-- Ultrasonic -->
+          <div class="chart-group">
+            <h4>Ultrasonic Distance</h4>
+            <canvas id="ultrasonicChart"></canvas>
+          </div>
+          
+          <!-- Line Sensors -->
+          <div class="chart-group">
+            <h4>Line Sensors</h4>
+            <canvas id="lineSensorsChart"></canvas>
+          </div>
+          
+          <!-- Battery -->
+          <div class="chart-group">
+            <h4>Battery Voltage</h4>
+            <canvas id="batteryChart"></canvas>
+          </div>
+          
+          <!-- Motors -->
+          <div class="chart-group">
+            <h4>Motor PWM</h4>
+            <canvas id="motorChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Connection Statistics -->
+        <div class="diagnostics-section">
+          <h3>Connection Statistics</h3>
+          <div class="stats-grid">
+            <div class="stat-item">
+              <span class="stat-label">Uptime:</span>
+              <span class="stat-value" id="statUptime">0s</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Messages Sent:</span>
+              <span class="stat-value" id="statMessagesSent">0</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Messages Received:</span>
+              <span class="stat-value" id="statMessagesReceived">0</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Command Success Rate:</span>
+              <span class="stat-value" id="statSuccessRate">0%</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Avg Response Time:</span>
+              <span class="stat-value" id="statResponseTime">0ms</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Errors:</span>
+              <span class="stat-value" id="statErrors">0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Robot Information -->
+        <div class="diagnostics-section">
+          <h3>Robot Information</h3>
+          <div class="info-grid" id="robotInfoGrid">
+            <div class="info-item">
+              <span class="info-label">Firmware:</span>
+              <span class="info-value" id="infoFirmware">-</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Serial Port:</span>
+              <span class="info-value" id="infoSerialPort">-</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Baud Rate:</span>
+              <span class="info-value" id="infoBaudRate">-</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Capabilities:</span>
+              <span class="info-value" id="infoCapabilities">-</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error Toast -->
+  <div class="toast" id="errorToast">
+    <span class="toast-message" id="toastMessage"></span>
+    <button class="toast-close" id="toastClose">×</button>
+  </div>
+
+  <script src="/js/robot-client.js"></script>
+  <script src="/js/diagnostics.js"></script>
+  <script src="/js/run-mode.js"></script>
+</body>
+</html>
+

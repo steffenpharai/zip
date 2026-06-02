@@ -1,0 +1,63 @@
+/**:
+  ros__parameters:
+    # YOLOE-11 Prompt-Free Model Configuration
+    # Uses Ultralytics YOLO11 API (simplified, no custom parsing needed)
+    # Path to TensorRT engine (.engine) or PyTorch weights (.pt)
+    # Relative to package share or absolute path
+    model_path: ""
+    
+    # Input image size (416 for speed, 640 for accuracy)
+    # YOLOE-11 prompt-free optimized for 640x640 (matches TensorRT engine)
+    imgsz: 640
+    
+    # Confidence threshold (0.0 to 1.0)
+    # Lower for household rare items (0.2 recommended for prompt-free mode)
+    # Per Ultralytics: 0.1-0.25 for multi-object scenarios, 0.25-0.5 for balanced
+    conf: 0.2
+    
+    # IoU threshold for Non-maximum suppression (NMS)
+    # Lower values = more aggressive suppression (removes more overlapping detections)
+    # Higher values = less aggressive (keeps more detections)
+    # Standard: 0.45 for balanced detection
+    iou: 0.45
+    
+    # Legacy parameters (kept for compatibility, mapped to new names)
+    confidence_threshold: 0.2  # Maps to conf
+    nms_threshold: 0.45  # Maps to iou
+    input_width: 640  # Maps to imgsz
+    input_height: 640  # Maps to imgsz
+    
+    # Maximum number of detections per frame
+    max_det: 100
+    max_detections: 100  # Legacy compatibility
+    
+    # Enable visualization output (publishes annotated image)
+    enable_visualization: true
+    
+    # Visualization topic name
+    visualization_topic: "/detections/visualization"
+    
+    # Camera topic
+    camera_topic: "/camera/image_raw"
+    
+    # Detections topic
+    detections_topic: "/detections"
+    
+    # Device (GPU device ID as string, e.g., "0" for GPU 0)
+    device: "0"
+    
+    # Use FP16 precision (recommended for Jetson Orin Nano)
+    # Ultralytics handles TensorRT export automatically
+    half: true
+    
+    # Visualization settings
+    visualization:
+      line_width_min: 2
+      line_width_max: 5
+      show_labels: true
+      show_confidence: true
+      show_size: false  # Optional: show bbox dimensions
+      corner_markers: true
+      color_scheme: "class"  # Options: class, confidence, custom
+      label_font_scale: 0.6
+      label_thickness: 2

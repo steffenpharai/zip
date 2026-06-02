@@ -1,0 +1,78 @@
+name: Enhancement
+description: Suggest an improvement to existing functionality
+title: "[Enhancement] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting an enhancement! This is for improving existing features.
+        
+        **For AI Agents**: When implementing this enhancement, refer to:
+        - [Agent Guide](../../AGENT_GUIDE.md)
+        - [Development Workflow](../../docs/agents/development-workflow.md)
+        - [Architecture Guide](../../docs/agents/architecture.md)
+        - [.cursorrules](../../.cursorrules) for code patterns
+
+  - type: textarea
+    id: current
+    attributes:
+      label: Current Behavior
+      description: Describe how the feature currently works
+      placeholder: Currently, the feature does...
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed
+    attributes:
+      label: Proposed Enhancement
+      description: How should this be improved?
+      placeholder: The enhancement would...
+    validations:
+      required: true
+
+  - type: textarea
+    id: benefits
+    attributes:
+      label: Benefits
+      description: What benefits would this enhancement provide?
+      placeholder: This would improve...
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      description: What conditions must be met for this enhancement to be considered complete?
+      placeholder: |
+        - [ ] Enhancement works as described
+        - [ ] Existing functionality not broken
+        - [ ] Tests pass
+        - [ ] Documentation updated
+        - [ ] TypeScript types are correct
+        - [ ] Follows event-driven architecture
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How important is this enhancement?
+      options:
+        - Low
+        - Medium
+        - High
+        - Critical
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: agent-friendly
+    attributes:
+      label: Agent Assignment
+      description: Can this be assigned to an AI agent?
+      options:
+        - label: This enhancement can be assigned to GitHub Copilot or Cursor Agent
+          required: false
+

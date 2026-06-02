@@ -1,0 +1,6 @@
+# This directory stores runtime data:
+# - audit.log: Audit logs (JSONL)
+# - traces/: Trace files (JSONL, daily)
+# - memory.db: SQLite database for pinned memory
+# - notes.db: SQLite database for notes
+

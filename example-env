@@ -1,0 +1,120 @@
+# ZIP Application Environment Variables
+# Copy this file to .env and fill in your values
+# 
+# Usage:
+#   cp example-env .env
+#   # Then edit .env and add your actual values
+#
+# For local development (without Docker):
+#   - NEXT_PUBLIC_ROBOT_BRIDGE_WS_URL should be: ws://localhost:8765/robot
+#   - Set LOOPBACK_MODE=true to test without robot hardware
+#   - Configure SERIAL_PORT for your system (COM5 on Windows, /dev/ttyUSB0 on Linux)
+
+# =============================================================================
+# REQUIRED - OpenAI Configuration
+# =============================================================================
+
+# OpenAI API Key (REQUIRED)
+# Get your key from: https://platform.openai.com/api-keys
+OPENAI_API_KEY=sk-your-api-key-here
+
+# =============================================================================
+# OPTIONAL - OpenAI Model Configuration
+# =============================================================================
+
+# Realtime model for voice interactions
+OPENAI_REALTIME_MODEL=gpt-4o-realtime-preview-2024-12-17
+
+# Responses API model for chat and tool calling
+OPENAI_RESPONSES_MODEL=gpt-4o
+
+# Vision model for image analysis
+OPENAI_VISION_MODEL=gpt-4o
+
+# TTS model for voice fallback
+OPENAI_TTS_MODEL=gpt-4o-mini-tts-2025-12-15
+
+# STT model for voice fallback
+OPENAI_STT_MODEL=whisper-1
+
+# Embedding model for semantic search
+OPENAI_EMBEDDING_MODEL=text-embedding-3-small
+
+# =============================================================================
+# OPTIONAL - ZIP Application Configuration
+# =============================================================================
+
+# Enable Realtime WebRTC (true/false)
+ZIP_REALTIME_ENABLED=true
+
+# Enable STT/TTS fallback (true/false)
+ZIP_VOICE_FALLBACK_ENABLED=true
+
+# Panel update interval in milliseconds
+ZIP_UPDATE_INTERVAL_MS=2000
+
+# Robot bridge WebSocket URL (automatically set in Docker, override if needed)
+# For local development: ws://localhost:8765/robot
+# For Docker: ws://robot-bridge:8765/robot
+NEXT_PUBLIC_ROBOT_BRIDGE_WS_URL=ws://localhost:8765/robot
+
+# =============================================================================
+# OPTIONAL - External Services
+# =============================================================================
+
+# 3D Printer API URL (Moonraker/Klipper)
+# Must be a local network address
+PRINTER_API_URL=http://169.254.178.90
+
+# Robot Camera URL (if using robot camera)
+ROBOT_CAMERA_URL=
+
+# =============================================================================
+# OPTIONAL - Robot Bridge Configuration
+# =============================================================================
+
+# Serial port path (auto-detected if not set)
+# Linux: /dev/ttyUSB0
+# Windows: COM5 (or COM3, COM4, etc.)
+# macOS: /dev/tty.usbserial-*
+ROBOT_SERIAL_PORT=COM5
+
+# Alternative: SERIAL_PORT (used if ROBOT_SERIAL_PORT is not set)
+# SERIAL_PORT=COM5
+
+# Serial baud rate
+SERIAL_BAUD=115200
+
+# WebSocket server port
+WS_PORT=8765
+
+# HTTP server port
+HTTP_PORT=8766
+
+# Enable loopback mode (simulated robot, no hardware needed)
+LOOPBACK_MODE=false
+
+# Debug serial communication (true/false)
+DEBUG_SERIAL=true
+
+# =============================================================================
+# OPTIONAL - Health Check Configuration
+# =============================================================================
+
+# Include memory usage in health check (true/false)
+# Set to false in production for security
+HEALTH_CHECK_INCLUDE_MEMORY=false
+
+# =============================================================================
+# OPTIONAL - Development/Production
+# =============================================================================
+
+# Node environment
+NODE_ENV=development
+
+# Disable Next.js telemetry
+NEXT_TELEMETRY_DISABLED=1
+
+# Enable file watching polling (useful for Docker volumes)
+WATCHPACK_POLLING=true
+

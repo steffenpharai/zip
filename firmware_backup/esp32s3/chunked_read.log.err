@@ -1,0 +1,43 @@
+Traceback (most recent call last):
+  File "C:\Zip\firmware_backup\esp32s3\read_flash_chunked.py", line 58, in main
+    data = esp.read_flash(off, n)
+  File "C:\Users\phara\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\esptool\loader.py", line 1579, in read_flash
+    p = self.read()
+  File "C:\Users\phara\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\esptool\loader.py", line 503, in read
+    return next(self._slip_reader)
+  File "C:\Users\phara\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\esptool\loader.py", line 2172, in slip_reader
+    raise FatalError(msg)
+esptool.util.FatalError: Packet content transfer stopped 
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\phara\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\esptool\loader.py", line 435, in __init__
+    self._port.open()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\phara\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\serial\serialwin32.py", line 64, in open
+    raise SerialException("could not open port {!r}: {!r}".format(self.portstr, ctypes.WinError()))
+serial.serialutil.SerialException: could not open port 'COM4': FileNotFoundError(2, 'The system cannot find the file specified.', None, 2)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Zip\firmware_backup\esp32s3\read_flash_chunked.py", line 85, in <module>
+    main()
+    ~~~~^^
+  File "C:\Zip\firmware_backup\esp32s3\read_flash_chunked.py", line 67, in main
+    esp, _ = connect(port)
+             ~~~~~~~^^^^^^
+  File "C:\Zip\firmware_backup\esp32s3\read_flash_chunked.py", line 23, in connect
+    esp = detect_chip(port)
+  File "C:\Users\phara\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\esptool\cmds.py", line 135, in detect_chip
+    detect_port = ESPLoader(port, baud, trace_enabled=trace_enabled)
+  File "C:\Users\phara\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\esptool\loader.py", line 461, in __init__
+    raise FatalError(
+    ...<3 lines>...
+    )
+esptool.util.FatalError: Could not open COM4, the port is busy or doesn't exist.
+(could not open port 'COM4': FileNotFoundError(2, 'The system cannot find the file specified.', None, 2))
+
+Hint: Check if the port is correct and ESP connected
+

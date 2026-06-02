@@ -1,0 +1,115 @@
+name: Agent Task
+description: A task specifically designed for AI agent assignment (GitHub Copilot or Cursor Agent)
+title: "[Agent Task] "
+labels: ["agent-friendly", "help wanted"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This template is specifically for tasks that can be assigned to AI agents.
+        
+        **Important Resources for Agents:**
+        - [Agent Guide](../../AGENT_GUIDE.md) - Quick reference
+        - [Agent Onboarding](../../docs/agents/README.md) - Getting started
+        - [Architecture Guide](../../docs/agents/architecture.md) - System design
+        - [Development Workflow](../../docs/agents/development-workflow.md) - How to work
+        - [GitHub Copilot Instructions](../../.github/copilot-instructions.md) - Copilot-specific
+        - [Cursor Agent Instructions](../../.cursor/agent/instructions.md) - Cursor-specific
+        - [.cursorrules](../../.cursorrules) - Code patterns and conventions
+
+  - type: textarea
+    id: task
+    attributes:
+      label: Task Description
+      description: Clear, detailed description of what needs to be done
+      placeholder: |
+        Example: "Add a new tool called 'get_timezone' that returns the user's timezone based on their location coordinates."
+        
+        Be specific about:
+        - What needs to be implemented
+        - Where in the codebase it should go
+        - Any related files or patterns to follow
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context & Background
+      description: Additional context that will help the agent understand the task
+      placeholder: |
+        - Why is this needed?
+        - Related features or tools
+        - Any constraints or requirements
+        - References to similar implementations
+    validations:
+      required: true
+
+  - type: textarea
+    id: requirements
+    attributes:
+      label: Requirements
+      description: Specific requirements and constraints
+      placeholder: |
+        - [ ] Must follow event-driven architecture
+        - [ ] Must use Zod schemas for validation
+        - [ ] Must register tool in registry.ts
+        - [ ] Must add tests
+        - [ ] Must update documentation
+        - [ ] Must follow TypeScript strict mode
+    validations:
+      required: true
+
+  - type: textarea
+    id: examples
+    attributes:
+      label: Examples or References
+      description: Links to similar code, examples, or documentation
+      placeholder: |
+        - Similar tool: lib/tools/implementations/weather.ts
+        - Pattern to follow: See get_weather tool implementation
+        - Documentation: README.md Tool Registry section
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      description: What must be true for this task to be complete?
+      placeholder: |
+        - [ ] Feature implemented as described
+        - [ ] All tests pass (npm run test:e2e)
+        - [ ] Type checking passes (npm run typecheck)
+        - [ ] Linting passes (npm run lint)
+        - [ ] Code follows .cursorrules patterns
+        - [ ] Documentation updated if needed
+        - [ ] Tool registered in registry.ts (if applicable)
+        - [ ] Event bus used correctly (if applicable)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: complexity
+    attributes:
+      label: Estimated Complexity
+      description: How complex is this task?
+      options:
+        - Simple - Straightforward implementation
+        - Medium - Requires understanding of architecture
+        - Complex - Multiple components, significant changes
+        - Very Complex - Major feature, architectural changes
+    validations:
+      required: true
+
+  - type: dropdown
+    id: agent-preference
+    attributes:
+      label: Agent Preference
+      description: Which agent should handle this? (Both can work on it)
+      options:
+        - No preference - Either agent
+        - GitHub Copilot - Prefer GitHub Copilot
+        - Cursor Agent - Prefer Cursor Agent
+        - Both - Can be split between agents
+    validations:
+      required: true
+

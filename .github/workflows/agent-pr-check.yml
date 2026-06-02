@@ -1,0 +1,73 @@
+name: Agent PR Validation
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  validate:
+    name: Validate Agent PR
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check PR description
+        run: |
+          if [ -z "${{ github.event.pull_request.body }}" ]; then
+            echo "⚠️ Warning: PR description is empty. Please add a description."
+          fi
+
+      - name: Check for required files
+        run: |
+          # Check if PR includes changes to critical files
+          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+          
+          # If tools are modified, check registry
+          if echo "$CHANGED_FILES" | grep -q "lib/tools/implementations/"; then
+            echo "Tool implementation changed - checking registry..."
+            if ! echo "$CHANGED_FILES" | grep -q "lib/tools/registry.ts"; then
+              echo "⚠️ Warning: Tool implementation changed but registry.ts not updated"
+            fi
+          fi
+          
+          # If events are modified, check types
+          if echo "$CHANGED_FILES" | grep -q "lib/events/"; then
+            echo "Event system changed - checking types..."
+            if ! echo "$CHANGED_FILES" | grep -q "lib/events/types.ts"; then
+              echo "⚠️ Warning: Event system changed but types.ts not updated"
+            fi
+          fi
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Check for TODO/FIXME
+        run: |
+          # Check for TODO/FIXME comments that might indicate incomplete work
+          if git diff origin/${{ github.base_ref }}...HEAD | grep -i "TODO\|FIXME" | grep -v "^\+.*#.*TODO\|FIXME.*for.*agent"; then
+            echo "⚠️ Warning: Found TODO/FIXME comments. Please ensure they're intentional."
+          fi
+
+      - name: PR Summary
+        run: |
+          echo "## PR Validation Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Type checking passed" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Linting passed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Note**: Full test suite should be run before merging." >> $GITHUB_STEP_SUMMARY
+

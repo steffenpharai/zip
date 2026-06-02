@@ -1,0 +1,6 @@
+# Macro Cancel Service
+# Cancel any active macro
+
+---
+bool success
+string message

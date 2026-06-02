@@ -1,0 +1,7 @@
+# Servo Control Service
+# Control the pan servo (0-180 degrees)
+
+uint8 angle  # Servo angle in degrees (0-180)
+---
+bool success
+string message

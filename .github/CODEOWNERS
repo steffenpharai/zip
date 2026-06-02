@@ -1,0 +1,35 @@
+# Code Owners for ZIP Project
+# This file helps agents understand code ownership and structure
+
+# Core architecture files
+/lib/orchestrators/ @phara
+/lib/events/ @phara
+/lib/tools/registry.ts @phara
+/lib/tools/executor.ts @phara
+
+# Tool implementations
+/lib/tools/implementations/ @phara
+
+# API routes
+/app/api/ @phara
+
+# Components
+/components/ @phara
+
+# Hooks
+/hooks/ @phara
+
+# Configuration files
+/.cursorrules @phara
+/.github/ @phara
+/package.json @phara
+/tsconfig.json @phara
+
+# Documentation
+/docs/ @phara
+/README.md @phara
+/AGENT_GUIDE.md @phara
+
+# All other files
+* @phara
+
