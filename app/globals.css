@@ -4,7 +4,9 @@
 
 :root {
   --font-inter: 'Inter', sans-serif;
-  
+  --font-jb-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --font-plex-cond: 'IBM Plex Sans Condensed', system-ui, sans-serif;
+
   /* Light theme colors (default) */
   --color-background: #F5F7FA;
   --color-panel-surface: #FFFFFF;
@@ -12,6 +14,22 @@
   --color-border: rgba(0, 0, 0, 0.10);
   --color-text-primary: #1A1F2E;
   --color-text-muted: #6B7280;
+
+  /* ZIP v2 phosphor system — same vars work in both themes */
+  --v2-cyan: #27B4CD;
+  --v2-cyan-bright: #6FE0FF;
+  --v2-green: #2EE59D;
+  --v2-amber: #F59E0B;
+  --v2-rose: #FB7185;
+  --v2-rose-deep: #E11D48;
+  --v2-bg: #050B11;
+  --v2-bg-rim: #0A1822;
+  --v2-panel: rgba(8, 18, 26, 0.78);
+  --v2-panel-edge: rgba(60, 180, 220, 0.18);
+  --v2-hair: rgba(60, 180, 220, 0.10);
+  --v2-text: #BFE6F0;
+  --v2-text-dim: #6F8E9B;
+  --v2-text-mute: #43606E;
 }
 
 html.dark,
@@ -44,6 +62,209 @@ body {
   max-width: 100vw;
   overflow-x: hidden;
 }
+
+/* =========================================================================
+   ZIP V2 — phosphor system. Used only inside /v2 routes (scoped via class).
+   ========================================================================= */
+
+.zip-v2 {
+  /* Override transitions inside the cockpit — we want immediate redraws on
+     telemetry, not 200ms ease-ins. */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "tnum" 1, "cv11" 1, "ss01" 1;
+}
+
+.zip-v2 *,
+.zip-v2 *::before,
+.zip-v2 *::after {
+  transition: none;
+}
+
+.zip-v2 button,
+.zip-v2 [role="button"] {
+  transition: background-color 120ms ease, border-color 120ms ease,
+    color 120ms ease, transform 120ms ease, box-shadow 120ms ease;
+}
+
+/* Body background gradient — the "deep void with cyan rim" we want behind everything */
+.zip-v2-bg {
+  background:
+    radial-gradient(
+      ellipse 80% 60% at 50% 38%,
+      rgba(39, 180, 205, 0.10) 0%,
+      rgba(39, 180, 205, 0.04) 35%,
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse 90% 100% at 50% 100%,
+      rgba(39, 180, 205, 0.06) 0%,
+      transparent 60%
+    ),
+    linear-gradient(180deg, var(--v2-bg) 0%, var(--v2-bg-rim) 100%);
+}
+
+/* Grain overlay — placed as a pseudo on the viewport for that
+   "sensor-display" texture. Procedural via SVG noise. */
+.zip-v2-grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.15 0 0 0 0 0.7 0 0 0 0 0.8 0 0 0 0.35 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.07;
+  mix-blend-mode: screen;
+}
+
+/* Scanline overlay — used on the 3D viewport and camera-feed stub */
+.zip-v2-scanlines::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(111, 224, 255, 0.04) 0px,
+    rgba(111, 224, 255, 0.04) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  mix-blend-mode: overlay;
+}
+
+/* Sonar / ranging pulse — slow, used inside SVG telemetry widgets */
+@keyframes zip-pulse-soft {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 1; }
+}
+.zip-pulse-soft { animation: zip-pulse-soft 1.4s ease-in-out infinite; }
+
+/* Connection dot — sharper pulse */
+@keyframes zip-pulse-dot {
+  0%, 70%, 100% { transform: scale(1);   opacity: 1; }
+  35%           { transform: scale(1.6); opacity: 0.45; }
+}
+.zip-pulse-dot { animation: zip-pulse-dot 1.8s ease-out infinite; }
+
+/* Breathing brightness on idle elements */
+@keyframes zip-breathe {
+  0%, 100% { filter: brightness(0.95); }
+  50%      { filter: brightness(1.08); }
+}
+.zip-breathe { animation: zip-breathe 3.6s ease-in-out infinite; }
+
+/* Sparkline cursor — small blinking marker at the leading edge */
+@keyframes zip-blink {
+  0%, 60% { opacity: 1; }
+  61%, 100% { opacity: 0.15; }
+}
+.zip-blink { animation: zip-blink 1.05s steps(1, end) infinite; }
+
+/* Caret for the UART console */
+@keyframes zip-caret {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+.zip-caret { animation: zip-caret 1.05s steps(1, end) infinite; }
+
+/* Glow utilities — used sparingly */
+.zip-glow-cyan { text-shadow: 0 0 8px rgba(111, 224, 255, 0.55), 0 0 22px rgba(39, 180, 205, 0.20); }
+.zip-glow-green { text-shadow: 0 0 8px rgba(46, 229, 157, 0.50); }
+.zip-glow-rose { box-shadow: 0 0 32px rgba(251, 113, 133, 0.35), 0 0 60px rgba(225, 29, 72, 0.25); }
+.zip-glow-amber { text-shadow: 0 0 8px rgba(245, 158, 11, 0.55); }
+
+/* Hairline border + edge highlight for panels */
+.zip-bezel {
+  position: relative;
+  background:
+    linear-gradient(180deg, rgba(111, 224, 255, 0.04) 0%, rgba(111, 224, 255, 0) 18%),
+    var(--v2-panel);
+  border: 1px solid var(--v2-panel-edge);
+  border-radius: 4px;
+  box-shadow:
+    inset 0 1px 0 rgba(111, 224, 255, 0.06),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.4),
+    0 24px 60px -32px rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(10px) saturate(140%);
+  -webkit-backdrop-filter: blur(10px) saturate(140%);
+}
+
+/* Corner brackets — used as decorative bezel marks */
+.zip-corner {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-color: var(--v2-cyan);
+  opacity: 0.7;
+}
+.zip-corner-tl { top: -1px; left: -1px; border-top: 1px solid; border-left: 1px solid; }
+.zip-corner-tr { top: -1px; right: -1px; border-top: 1px solid; border-right: 1px solid; }
+.zip-corner-bl { bottom: -1px; left: -1px; border-bottom: 1px solid; border-left: 1px solid; }
+.zip-corner-br { bottom: -1px; right: -1px; border-bottom: 1px solid; border-right: 1px solid; }
+
+/* "Phosphor track" — used for thin progress / range bars */
+.zip-track {
+  background:
+    linear-gradient(90deg,
+      rgba(46, 229, 157, 0.15) 0%,
+      rgba(46, 229, 157, 0.15) 33%,
+      rgba(245, 158, 11, 0.15) 33%,
+      rgba(245, 158, 11, 0.15) 66%,
+      rgba(251, 113, 133, 0.18) 66%,
+      rgba(251, 113, 133, 0.18) 100%
+    );
+}
+
+/* Tick rail — 1px tick marks every Npx, used as range scale */
+.zip-tick-rail {
+  background-image: repeating-linear-gradient(
+    to right,
+    rgba(60, 180, 220, 0.35) 0px,
+    rgba(60, 180, 220, 0.35) 1px,
+    transparent 1px,
+    transparent 12px
+  );
+}
+
+/* Diagonal hatching for inactive / "no signal" surfaces */
+.zip-hatch {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    rgba(111, 224, 255, 0.05) 0px,
+    rgba(111, 224, 255, 0.05) 1px,
+    transparent 1px,
+    transparent 10px
+  );
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .zip-pulse-soft,
+  .zip-pulse-dot,
+  .zip-breathe,
+  .zip-blink,
+  .zip-caret {
+    animation: none !important;
+  }
+}
+
+/* Tabular nums everywhere inside the cockpit */
+.zip-num { font-variant-numeric: tabular-nums; font-family: var(--font-jb-mono); }
+
+/* Caps label */
+.zip-label {
+  font-family: var(--font-plex-cond);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+}
+
+/* Code/log */
+.zip-code { font-family: var(--font-jb-mono); font-variant-numeric: tabular-nums; }
+
+/* =========================================================================
+   Projector mode (preserved from V1)
+   ========================================================================= */
 
 /* Projector mode optimizations for 1280x720 display */
 html.projector,
@@ -87,92 +308,22 @@ html.projector,
   line-height: 4rem;
 }
 
-/* Increase spacing in projector mode */
-.projector .gap-3 {
-  gap: 1.5rem; /* 24px instead of 12px */
-}
-
-.projector .gap-4 {
-  gap: 2rem; /* 32px instead of 16px */
-}
-
-.projector .gap-8 {
-  gap: 3rem; /* 48px instead of 32px */
-}
-
-/* Increase padding */
-.projector .p-3 {
-  padding: 1.5rem; /* 24px instead of 12px */
-}
-
-.projector .p-4 {
-  padding: 2rem; /* 32px instead of 16px */
-}
-
-.projector .px-3 {
-  padding-left: 1.5rem; /* 24px instead of 12px */
-  padding-right: 1.5rem;
-}
-
-.projector .px-4 {
-  padding-left: 2rem; /* 32px instead of 16px */
-  padding-right: 2rem;
-}
-
-.projector .py-1\.5 {
-  padding-top: 1rem; /* 16px instead of 6px */
-  padding-bottom: 1rem;
-}
-
-.projector .py-2 {
-  padding-top: 1.25rem; /* 20px instead of 8px */
-  padding-bottom: 1.25rem;
-}
-
-/* Increase button sizes */
-.projector button {
-  min-height: 2.5rem; /* 40px minimum height */
-}
-
-.projector .w-8 {
-  width: 3rem; /* 48px instead of 32px */
-  height: 3rem;
-}
-
-.projector .h-8 {
-  height: 3rem; /* 48px instead of 32px */
-}
-
-.projector .w-12 {
-  width: 4rem; /* 64px instead of 48px */
-  height: 4rem;
-}
-
-.projector .h-12 {
-  height: 4rem; /* 64px instead of 48px */
-}
-
-/* Increase icon sizes */
-.projector svg {
-  width: 1.5rem; /* 24px default instead of 16px */
-  height: 1.5rem;
-}
-
-.projector .w-4 {
-  width: 1.5rem; /* 24px instead of 16px */
-  height: 1.5rem;
-}
-
-.projector .h-4 {
-  height: 1.5rem; /* 24px instead of 16px */
-}
-
-.projector .w-5 {
-  width: 2rem; /* 32px instead of 20px */
-  height: 2rem;
-}
-
-.projector .h-5 {
-  height: 2rem; /* 32px instead of 20px */
-}
-
+.projector .gap-3 { gap: 1.5rem; }
+.projector .gap-4 { gap: 2rem; }
+.projector .gap-8 { gap: 3rem; }
+.projector .p-3 { padding: 1.5rem; }
+.projector .p-4 { padding: 2rem; }
+.projector .px-3 { padding-left: 1.5rem; padding-right: 1.5rem; }
+.projector .px-4 { padding-left: 2rem; padding-right: 2rem; }
+.projector .py-1\.5 { padding-top: 1rem; padding-bottom: 1rem; }
+.projector .py-2 { padding-top: 1.25rem; padding-bottom: 1.25rem; }
+.projector button { min-height: 2.5rem; }
+.projector .w-8 { width: 3rem; height: 3rem; }
+.projector .h-8 { height: 3rem; }
+.projector .w-12 { width: 4rem; height: 4rem; }
+.projector .h-12 { height: 4rem; }
+.projector svg { width: 1.5rem; height: 1.5rem; }
+.projector .w-4 { width: 1.5rem; height: 1.5rem; }
+.projector .h-4 { height: 1.5rem; }
+.projector .w-5 { width: 2rem; height: 2rem; }
+.projector .h-5 { height: 2rem; }
