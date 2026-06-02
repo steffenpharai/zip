@@ -133,6 +133,7 @@ export default function V2Page() {
       }
       center={
         <>
+          {/* The 3D viewport is the HERO — fills all remaining vertical space. */}
           <div className="flex-1 min-h-0 relative zip-bezel overflow-hidden">
             <ViewportFrame
               callsign="VIEW // WORLD"
@@ -151,9 +152,7 @@ export default function V2Page() {
               bottomRight={
                 <>
                   <span>ULTRA</span>
-                  <span
-                    className="zip-num text-[var(--v2-text)]"
-                  >
+                  <span className="zip-num text-[var(--v2-text)]">
                     {state.ultrasonicCm == null ? "—" : `${state.ultrasonicCm}cm`}
                   </span>
                 </>
@@ -162,7 +161,10 @@ export default function V2Page() {
               <WorldView3D axes={axes} ultrasonicCm={state.ultrasonicCm} />
             </ViewportFrame>
           </div>
-          <CameraFeed />
+          {/* Compact camera strip BELOW the hero — fixed height regardless of column width */}
+          <div className="h-44 shrink-0">
+            <CameraFeed />
+          </div>
         </>
       }
       right={
