@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import type { ServerMessage } from "./types";
 
 /**
@@ -10,16 +10,20 @@ import type { ServerMessage } from "./types";
  * Patch `useZipBrain` lightly: it stores latest messages here, while still
  * driving the canonical `state`. We avoid altering the existing hook.
  *
- * Usage:
- *   const { register } = useServerMessageBus();
- *   useEffect(() => register((m) => { ... }), [register]);
- *
- * The page-level component is responsible for calling `feed(msg)` from a
- * lightweight WebSocket message subscription wired alongside `useZipBrain`.
+ * IMPORTANT: the returned object's identity is STABLE across renders — both
+ * `register` and `feed` are memoised. Otherwise effects that depend on the
+ * bus would tear down and rebuild on every render, which (for the parallel
+ * WS bus below) caused us to leak ~90 simultaneous WebSocket clients to the
+ * Jetson and starve the camera proxies of asyncio cycles.
  */
 type Listener = (m: ServerMessage) => void;
 
-export function useServerMessageBus() {
+export interface ServerMessageBus {
+  register: (fn: Listener) => () => void;
+  feed: (m: ServerMessage) => void;
+}
+
+export function useServerMessageBus(): ServerMessageBus {
   const listeners = useRef<Set<Listener>>(new Set());
 
   const register = useCallback((fn: Listener) => {
@@ -39,26 +43,33 @@ export function useServerMessageBus() {
     }
   }, []);
 
-  return { register, feed };
+  // Memoise the bus object itself so any consumer that includes it in a
+  // useEffect dep array doesn't tear down on every render.
+  return useMemo(() => ({ register, feed }), [register, feed]);
 }
 
 /**
- * Convenience: open a parallel WebSocket to the same URL just to pipe raw
- * messages into the bus. Cheaper than refactoring `useZipBrain`; we use it
- * only for low-rate side-channels (pong/ack) and ack-like info.
+ * Open a parallel WebSocket to the same URL just to pipe raw messages into
+ * the bus. Cheaper than refactoring `useZipBrain`; we use it only for
+ * low-rate side-channels (pong/ack) and ack-like info.
  *
- * IMPORTANT: This means the latency hook double-pings — the brain control
- * plane accepts multiple WS clients and treats each as an observer. Phase 2
- * scope is fine with this; we can fold it into the canonical hook later.
+ * The effect intentionally depends ONLY on `url` so it isn't re-created
+ * when the bus's identity changes between renders. We keep a ref to the
+ * bus so the WS handler can still call into the freshest `feed`.
  */
-export function useParallelWsBus(url: string) {
+export function useParallelWsBus(url: string): ServerMessageBus {
   const bus = useServerMessageBus();
+  const busRef = useRef(bus);
+  busRef.current = bus;
+
   useEffect(() => {
     let ws: WebSocket | null = null;
     let killed = false;
     let backoff = 600;
+    let retryTimer: ReturnType<typeof setTimeout> | null = null;
 
     const open = () => {
+      if (killed) return;
       try {
         ws = new WebSocket(url);
       } catch {
@@ -66,14 +77,14 @@ export function useParallelWsBus(url: string) {
       }
       ws.onmessage = (ev) => {
         try {
-          bus.feed(JSON.parse(ev.data));
+          busRef.current.feed(JSON.parse(ev.data));
         } catch {
           /* ignore */
         }
       };
       ws.onclose = () => {
         if (killed) return;
-        setTimeout(() => {
+        retryTimer = setTimeout(() => {
           backoff = Math.min(backoff * 2, 8000);
           open();
         }, backoff);
@@ -83,14 +94,19 @@ export function useParallelWsBus(url: string) {
       };
     };
     open();
+
     return () => {
       killed = true;
+      if (retryTimer) clearTimeout(retryTimer);
       try {
         ws?.close(1000, "unmount");
       } catch {
         /* ignore */
       }
     };
-  }, [url, bus]);
+    // Critical: depend ONLY on url. `bus` is read via ref so we don't
+    // re-create the socket every render.
+  }, [url]);
+
   return bus;
 }
