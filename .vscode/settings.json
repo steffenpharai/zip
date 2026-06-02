@@ -1,0 +1,79 @@
+{
+    "makefile.configureOnOpen": false,
+    
+    // Memory optimization for Jetson Orin Nano 8GB
+    "files.watcherExclude": {
+        "**/node_modules/**": true,
+        "**/.next/**": true,
+        "**/dist/**": true,
+        "**/build/**": true,
+        "**/install/**": true,
+        "**/.pio/**": true,
+        "**/models/**": true,
+        "**/data/traces/**": true,
+        "**/ELEGOO Smart Robot Car Kit V4.0 2023.02.01/**": true,
+        "**/ros2_ws/build/**": true,
+        "**/ros2_ws/install/**": true,
+        "**/ros2_ws/log/**": true,
+        "**/.ros/**": true,
+        "**/coverage/**": true,
+        "**/playwright-report/**": true,
+        "**/test-results/**": true,
+        "**/artifacts/**": true,
+        "**/__pycache__/**": true,
+        "**/*.pyc": true
+    },
+    
+    "search.exclude": {
+        "**/node_modules": true,
+        "**/.next": true,
+        "**/dist": true,
+        "**/build": true,
+        "**/install": true,
+        "**/.pio": true,
+        "**/models": true,
+        "**/data/traces": true,
+        "**/ELEGOO Smart Robot Car Kit V4.0 2023.02.01": true,
+        "**/ros2_ws/build": true,
+        "**/ros2_ws/install": true,
+        "**/ros2_ws/log": true,
+        "**/.ros": true,
+        "**/coverage": true,
+        "**/playwright-report": true,
+        "**/test-results": true,
+        "**/artifacts": true,
+        "**/__pycache__": true
+    },
+    
+    "files.exclude": {
+        "**/.pio": true,
+        "**/__pycache__": true,
+        "**/*.pyc": true
+    },
+    
+    // Reduce TypeScript memory usage
+    "typescript.tsserver.maxTsServerMemory": 2048,
+    "typescript.preferences.includePackageJsonAutoImports": "off",
+    
+    // Reduce file watching
+    "files.watcherInclude": [
+        "**/*.{ts,tsx,js,jsx,json,md,py,cpp,h,hpp,yaml,yml}"
+    ],
+    
+    // Limit search results
+    "search.maxResults": 2000,
+    
+    // Disable unnecessary features
+    "extensions.autoCheckUpdates": false,
+    "extensions.autoUpdate": false,
+    
+    // Editor optimizations
+    "editor.semanticHighlighting.enabled": true,
+    "editor.codeLens": false,
+    "editor.minimap.enabled": false,
+    
+    // Git optimizations
+    "git.enabled": true,
+    "git.autoRepositoryDetection": false,
+    "git.ignoreLimitWarning": true
+}

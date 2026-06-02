@@ -1,0 +1,21 @@
+# Request
+# Image data as base64 string (optional, use image_msg if available)
+string image_data
+# Image as ROS message (optional, use image_data if available)
+sensor_msgs/Image image_msg
+# Prompt for the model
+string prompt
+# Detections context (optional, from YOLO11)
+string[] detections_context
+# Maximum tokens in response
+int32 max_tokens
+# Temperature for generation
+float64 temperature
+
+---
+
+# Response
+# Success flag
+bool success
+# Generated scene description
+string description

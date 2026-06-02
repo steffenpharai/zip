@@ -1,0 +1,13 @@
+serial_bridge_node:
+  ros__parameters:
+    # Serial port configuration
+    serial_port: ""  # Empty for auto-detect, or specify like "/dev/ttyUSB0" or "COM3"
+    baud_rate: 115200
+    auto_detect_port: true
+    
+    # Setpoint command settings
+    setpoint_ttl_ms: 200  # Time-to-live for setpoint commands (deadman safety)
+    setpoint_max_rate_hz: 30.0  # Maximum rate for setpoint commands
+    
+    # Sensor polling
+    sensor_poll_rate_hz: 5.0  # Rate at which to poll ultrasonic and battery sensors

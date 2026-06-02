@@ -1,0 +1,13 @@
+{
+  "name": "zip-robot-tools",
+  "version": "1.0.0",
+  "description": "Host-side tools for ZIP Robot firmware testing",
+  "scripts": {
+    "test": "node serial_motion_test.js",
+    "bringup": "node serial_motor_bringup.js"
+  },
+  "dependencies": {
+    "serialport": "^12.0.0"
+  }
+}
+

@@ -1,0 +1,39 @@
+[Unit]
+Description=ZIP Robot Bridge Service (WebSocket/Serial)
+After=network.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=%i
+Group=%i
+WorkingDirectory=/home/%i/Projects/Zip/robot/bridge/zip-robot-bridge
+
+# Environment
+Environment="NODE_ENV=production"
+Environment="WS_PORT=8765"
+Environment="HTTP_PORT=8766"
+Environment="SERIAL_BAUD=115200"
+Environment="PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+# Start robot bridge
+ExecStart=/usr/bin/node dist/index.js
+
+# Restart policy
+Restart=on-failure
+RestartSec=10
+
+# Resource limits
+MemoryLimit=512M
+CPUQuota=100%
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=zip-robot-bridge
+
+# Device access (for serial ports)
+SupplementaryGroups=dialout tty
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,103 @@
+name: Bug Report
+description: Report a bug or unexpected behavior
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug! Please provide as much detail as possible.
+        
+        **For AI Agents**: When fixing this bug, refer to:
+        - [Agent Guide](../../AGENT_GUIDE.md)
+        - [Development Workflow](../../docs/agents/development-workflow.md)
+        - [.cursorrules](../../.cursorrules) for code patterns
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of the bug
+      placeholder: Describe what happened...
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: How can we reproduce this bug?
+      placeholder: |
+        1. Go to '...'
+        2. Click on '...'
+        3. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What should happen instead?
+      placeholder: The expected behavior is...
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      description: What actually happens?
+      placeholder: Instead, I see...
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Please provide environment details
+      placeholder: |
+        - OS: [e.g., Windows 10, macOS 14, Linux]
+        - Browser: [e.g., Chrome 120, Firefox 121]
+        - Node version: [e.g., 20.11.0]
+        - ZIP version: [e.g., 0.1.0]
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Error Logs / Console Output
+      description: Paste any relevant error messages or console output
+      placeholder: Error messages or stack traces...
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: If applicable, add screenshots to help explain the problem
+      placeholder: Drag and drop screenshots here...
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      description: How severe is this bug?
+      options:
+        - Low - Minor issue, workaround available
+        - Medium - Affects functionality but has workaround
+        - High - Significantly impacts functionality
+        - Critical - Breaks core functionality
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: agent-friendly
+    attributes:
+      label: Agent Assignment
+      description: Can this be assigned to an AI agent?
+      options:
+        - label: This bug fix can be assigned to GitHub Copilot or Cursor Agent
+          required: false
+

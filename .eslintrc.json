@@ -1,0 +1,21 @@
+{
+  "extends": "next/core-web-vitals",
+  "ignorePatterns": [
+    "services/zip-avatar-server/venv/**",
+    ".next/**",
+    "out/**",
+    "dist/**",
+    "build/**",
+    "node_modules/**",
+    "data/**",
+    "*.log",
+    "*.jsonl",
+    "test-results/**",
+    "playwright-report/**",
+    "coverage/**",
+    "artifacts/**",
+    "robot/**",
+    "services/**"
+  ]
+}
+

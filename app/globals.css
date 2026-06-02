@@ -1,0 +1,178 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-inter: 'Inter', sans-serif;
+  
+  /* Light theme colors (default) */
+  --color-background: #F5F7FA;
+  --color-panel-surface: #FFFFFF;
+  --color-panel-surface-2: #F0F2F5;
+  --color-border: rgba(0, 0, 0, 0.10);
+  --color-text-primary: #1A1F2E;
+  --color-text-muted: #6B7280;
+}
+
+html.dark,
+.dark {
+  /* Dark theme colors */
+  --color-background: #0B1924;
+  --color-panel-surface: #091016;
+  --color-panel-surface-2: #0B141E;
+  --color-border: rgba(60, 180, 220, 0.20);
+  --color-text-primary: #A7C6D3;
+  --color-text-muted: #6F8E9B;
+}
+
+body {
+  color: var(--color-text-primary);
+  background: var(--color-background);
+  font-family: var(--font-inter);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+/* Projector mode optimizations for 1280x720 display */
+html.projector,
+.projector {
+  /* Increase base font sizes for better readability at distance */
+  font-size: 1.125rem; /* 18px base instead of 16px */
+}
+
+.projector .text-xs {
+  font-size: 0.875rem; /* 14px instead of 12px */
+  line-height: 1.5rem;
+}
+
+.projector .text-sm {
+  font-size: 1rem; /* 16px instead of 14px */
+  line-height: 1.75rem;
+}
+
+.projector .text-base {
+  font-size: 1.125rem; /* 18px instead of 16px */
+  line-height: 2rem;
+}
+
+.projector .text-lg {
+  font-size: 1.5rem; /* 24px instead of 18px */
+  line-height: 2.25rem;
+}
+
+.projector .text-xl {
+  font-size: 1.875rem; /* 30px instead of 20px */
+  line-height: 2.5rem;
+}
+
+.projector .text-2xl {
+  font-size: 2.5rem; /* 40px instead of 24px */
+  line-height: 3rem;
+}
+
+.projector .text-4xl {
+  font-size: 3.5rem; /* 56px instead of 36px */
+  line-height: 4rem;
+}
+
+/* Increase spacing in projector mode */
+.projector .gap-3 {
+  gap: 1.5rem; /* 24px instead of 12px */
+}
+
+.projector .gap-4 {
+  gap: 2rem; /* 32px instead of 16px */
+}
+
+.projector .gap-8 {
+  gap: 3rem; /* 48px instead of 32px */
+}
+
+/* Increase padding */
+.projector .p-3 {
+  padding: 1.5rem; /* 24px instead of 12px */
+}
+
+.projector .p-4 {
+  padding: 2rem; /* 32px instead of 16px */
+}
+
+.projector .px-3 {
+  padding-left: 1.5rem; /* 24px instead of 12px */
+  padding-right: 1.5rem;
+}
+
+.projector .px-4 {
+  padding-left: 2rem; /* 32px instead of 16px */
+  padding-right: 2rem;
+}
+
+.projector .py-1\.5 {
+  padding-top: 1rem; /* 16px instead of 6px */
+  padding-bottom: 1rem;
+}
+
+.projector .py-2 {
+  padding-top: 1.25rem; /* 20px instead of 8px */
+  padding-bottom: 1.25rem;
+}
+
+/* Increase button sizes */
+.projector button {
+  min-height: 2.5rem; /* 40px minimum height */
+}
+
+.projector .w-8 {
+  width: 3rem; /* 48px instead of 32px */
+  height: 3rem;
+}
+
+.projector .h-8 {
+  height: 3rem; /* 48px instead of 32px */
+}
+
+.projector .w-12 {
+  width: 4rem; /* 64px instead of 48px */
+  height: 4rem;
+}
+
+.projector .h-12 {
+  height: 4rem; /* 64px instead of 48px */
+}
+
+/* Increase icon sizes */
+.projector svg {
+  width: 1.5rem; /* 24px default instead of 16px */
+  height: 1.5rem;
+}
+
+.projector .w-4 {
+  width: 1.5rem; /* 24px instead of 16px */
+  height: 1.5rem;
+}
+
+.projector .h-4 {
+  height: 1.5rem; /* 24px instead of 16px */
+}
+
+.projector .w-5 {
+  width: 2rem; /* 32px instead of 20px */
+  height: 2rem;
+}
+
+.projector .h-5 {
+  height: 2rem; /* 32px instead of 20px */
+}
+

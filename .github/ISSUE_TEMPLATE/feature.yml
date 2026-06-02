@@ -1,0 +1,85 @@
+name: Feature Request
+description: Request a new feature or enhancement for ZIP
+title: "[Feature] "
+labels: ["enhancement", "feature"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a new feature! Please provide as much detail as possible.
+        
+        **For AI Agents**: When implementing this feature, refer to:
+        - [Agent Guide](../../AGENT_GUIDE.md)
+        - [Development Workflow](../../docs/agents/development-workflow.md)
+        - [Architecture Guide](../../docs/agents/architecture.md)
+        - [.cursorrules](../../.cursorrules) for code patterns
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Feature Description
+      description: Describe the feature you'd like to see
+      placeholder: A clear and concise description of the feature...
+    validations:
+      required: true
+
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Motivation
+      description: Why is this feature needed? What problem does it solve?
+      placeholder: This feature would help because...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: How should this feature work? (Optional - agents can propose solutions)
+      placeholder: The feature could work by...
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: What other approaches did you consider?
+      placeholder: Alternative approaches...
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      description: What conditions must be met for this feature to be considered complete?
+      placeholder: |
+        - [ ] Feature works as described
+        - [ ] Tests pass
+        - [ ] Documentation updated
+        - [ ] TypeScript types are correct
+        - [ ] Follows event-driven architecture
+        - [ ] Tool registered if applicable
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How important is this feature?
+      options:
+        - Low
+        - Medium
+        - High
+        - Critical
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: agent-friendly
+    attributes:
+      label: Agent Assignment
+      description: Can this be assigned to an AI agent?
+      options:
+        - label: This task can be assigned to GitHub Copilot or Cursor Agent
+          required: false
+

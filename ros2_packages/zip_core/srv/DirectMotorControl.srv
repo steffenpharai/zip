@@ -1,0 +1,9 @@
+# Direct Motor Control Service
+# Direct PWM control of motors (bypasses motion controller)
+# WARNING: Use with caution - bypasses safety layers
+
+int16 left_pwm  # Left motor PWM (-255 to 255)
+int16 right_pwm  # Right motor PWM (-255 to 255)
+---
+bool success
+string message

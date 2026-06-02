@@ -1,0 +1,30 @@
+/**:
+  ros__parameters:
+    # USB Camera Configuration
+    # Device path (typically /dev/video0)
+    device_id: 0
+    
+    # Image resolution
+    image_width: 640
+    image_height: 480
+    
+    # Frame rate (frames per second)
+    framerate: 30
+    
+    # Pixel format (YUYV, MJPEG, etc.)
+    pixel_format: "YUYV"
+    
+    # Camera info URL (for calibration)
+    # Leave empty if no calibration file available
+    camera_info_url: ""
+    
+    # Buffer size (number of frames to buffer)
+    # Increase buffer size to help with memory mapping
+    buffer_size: 4
+    
+    # Timeout for frame capture (milliseconds)
+    timeout_ms: 1000
+    
+    # Use USERPTR instead of MMAP if MMAP fails
+    # This avoids memory mapping issues on some systems
+    io_method: "USERPTR"  # Options: MMAP, USERPTR, DMABUF

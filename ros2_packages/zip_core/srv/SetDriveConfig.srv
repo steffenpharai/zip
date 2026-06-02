@@ -1,0 +1,8 @@
+# Set Drive Configuration Service
+# Configure drive safety parameters
+
+uint8 parameter  # 1=deadband, 2=accel_step, 3=decel_step, 4=kick_enable, 5=max_pwm_cap
+uint16 value  # Parameter value (see firmware docs for encoding)
+---
+bool success
+string message

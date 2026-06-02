@@ -1,0 +1,42 @@
+[Unit]
+Description=ZIP Vision Service (ROS 2 + YOLOE-11)
+After=network.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=steffen
+Group=steffen
+
+# Environment setup
+Environment="ROS_DOMAIN_ID=0"
+Environment="ROS_DISTRO=humble"
+Environment="PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/ros/humble/bin:/home/steffen/.local/bin"
+Environment="PYTHONUNBUFFERED=1"
+Environment="PYTHONPATH=/home/steffen/.local/lib/python3.10/site-packages:/usr/lib/python3.10/site-packages"
+
+# Source ROS 2 and workspace (virtual environment optional - PyTorch installed system-wide)
+ExecStartPre=/bin/bash -c 'source /opt/ros/humble/setup.bash; if [ -f /home/steffen/zip_vision_env/bin/activate ]; then source /home/steffen/zip_vision_env/bin/activate; fi; source /home/steffen/ros2_ws/install/setup.bash'
+
+# Launch vision pipeline with diagnostics bridge enabled
+ExecStart=/bin/bash -c 'source /opt/ros/humble/setup.bash; if [ -f /home/steffen/zip_vision_env/bin/activate ]; then source /home/steffen/zip_vision_env/bin/activate; fi; source /home/steffen/ros2_ws/install/setup.bash; ros2 launch zip_vision vision_native.launch.py enable_diagnostics_bridge:=true'
+
+# Restart policy
+Restart=on-failure
+RestartSec=10
+
+# Resource limits (Jetson Orin Nano 8GB)
+MemoryLimit=2.5G
+CPUQuota=400%
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=zip-vision
+
+# Security (optional, adjust as needed)
+# NoNewPrivileges=true
+# PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

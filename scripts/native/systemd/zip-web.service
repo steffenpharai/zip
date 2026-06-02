@@ -1,0 +1,36 @@
+[Unit]
+Description=ZIP Web Application (Next.js)
+After=network.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=steffen
+Group=steffen
+WorkingDirectory=/home/steffen/Projects/Zip
+
+# Environment
+EnvironmentFile=/home/steffen/Projects/Zip/.env
+Environment="NODE_ENV=production"
+Environment="PORT=3000"
+Environment="HOSTNAME=0.0.0.0"
+Environment="PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+# Start Next.js
+ExecStart=/usr/bin/npm start
+
+# Restart policy
+Restart=on-failure
+RestartSec=10
+
+# Resource limits
+MemoryLimit=2G
+CPUQuota=200%
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=zip-web
+
+[Install]
+WantedBy=multi-user.target

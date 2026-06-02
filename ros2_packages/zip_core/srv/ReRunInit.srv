@@ -1,0 +1,6 @@
+# Re-run Init Sequence Service
+# Re-run the initialization sequence
+
+---
+bool success
+string message

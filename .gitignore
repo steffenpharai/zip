@@ -1,0 +1,103 @@
+# Zip V2 — outer (zip-v2) repo gitignore
+
+# === Nested repos managed independently ===
+# zip-brain lives at /jetson, has its own .git
+/jetson/
+
+# === Backups (binaries; not tracked) ===
+/firmware_backup/
+
+# === Downloaded toolchain mirrors ===
+/tools/
+
+# === Firmware build artifacts ===
+.pio/
+*.elf
+*.bin
+*.hex
+*.map
+
+# === ML model weights & TensorRT engines (hardware-built, regenerated on deploy) ===
+*.pt
+*.onnx
+*.engine
+*.trt
+*.plan
+
+# === ROS 2 workspace outputs (V1 leftovers, kept on disk but not tracked) ===
+/build/
+/install/
+/log/
+/ros2_packages/*/models/
+
+# === Node / Next.js ===
+/node_modules
+/.pkg-cache
+/.next
+/out
+.env
+.env*.local
+.vercel
+*.tsbuildinfo
+next-env.d.ts
+
+# === Python ===
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+
+# === Test outputs ===
+/coverage
+/playwright-report
+/test-results
+
+# === V1 reference dirs that should not be re-distributed ===
+robot/ELEGOO*/
+docs/VRM-registry-capture.json
+
+# === Runtime data (V1 patterns kept) ===
+data/*.db
+data/*.log
+data/traces/*.jsonl
+!data/.gitkeep
+/logs/
+
+# === Large binary assets — track outside of git if needed ===
+public/avatars/*.vrm
+*.pdb
+vrm_*.json
+vrm_*.txt
+
+# === Editor / OS ===
+.DS_Store
+*.pem
+*.swp
+.idea/
+.cursor/
+.cursorrules
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# === Debug / temp ===
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+head.md
+TEST_RESULTS.md
+/artifacts
+
+# === Old subprojects not in V2 scope ===
+/services/
+
+# === Robot bridge V1 dist/node_modules (we kept the source but not artifacts) ===
+robot/bridge/*/dist/
+robot/bridge/*/node_modules/
+robot/bridge/*/data/
+
+robot/firmware/*/.pio/
+robot/firmware/*/.vscode/

@@ -1,0 +1,7 @@
+# Get Diagnostics Service
+# Request comprehensive robot diagnostics
+
+---
+bool success
+zip_core/RobotDiagnostics diagnostics
+string raw_response

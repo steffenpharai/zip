@@ -1,0 +1,38 @@
+name: TypeScript Type Check
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  typecheck:
+    name: TypeScript Type Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run type check
+        run: npm run typecheck
+
+      - name: Check for any types
+        run: |
+          # Check for explicit 'any' types (excluding justified cases)
+          if grep -r ":\s*any[^a-zA-Z]" --include="*.ts" --include="*.tsx" lib/ app/ components/ hooks/ | grep -v "//.*justified\|@ts-ignore\|@ts-expect-error"; then
+            echo "⚠️ Warning: Found 'any' types. Please use proper TypeScript types."
+            grep -r ":\s*any[^a-zA-Z]" --include="*.ts" --include="*.tsx" lib/ app/ components/ hooks/ | grep -v "//.*justified\|@ts-ignore\|@ts-expect-error" || true
+            exit 0  # Don't fail, just warn
+          fi
+
