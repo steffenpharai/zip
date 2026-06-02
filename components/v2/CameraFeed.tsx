@@ -23,13 +23,22 @@ export function CameraFeed({
   /** Undefined → "no signal" placeholder. */
   streamUrl?: string;
 }) {
+  // `bust` is bumped ONLY on stream error. We deliberately do NOT bump it
+  // when streamUrl first becomes defined or when the component re-renders:
+  //   - React StrictMode double-invokes effects, so an "always bump on mount"
+  //     pattern would produce two distinct URLs (?t=1 then ?t=2) and the
+  //     browser would open two MJPEG connections per camera. On the brain
+  //     side that means two GStreamer pipelines fighting over /dev/video0
+  //     and both failing with "Device busy".
+  //   - Deduplicating via stable URL lets the browser collapse StrictMode's
+  //     double-invocations into a single HTTP request.
   const [bust, setBust] = useState(0);
   const [live, setLive] = useState(false);
   const reconnectRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // When the stream URL changes, reset state so the new URL is loaded fresh.
+  // Reset live indicator when URL changes; the URL itself does NOT include
+  // the bust counter on initial mount (only on error).
   useEffect(() => {
-    setBust((b) => b + 1);
     setLive(false);
     return () => {
       if (reconnectRef.current) clearTimeout(reconnectRef.current);
@@ -45,7 +54,13 @@ export function CameraFeed({
     setLive(true);
   };
 
-  const srcWithBust = streamUrl ? `${streamUrl}?t=${bust}` : undefined;
+  // bust=0 produces the canonical URL — same across StrictMode double-mounts.
+  const srcWithBust =
+    streamUrl != null
+      ? bust === 0
+        ? streamUrl
+        : `${streamUrl}?b=${bust}`
+      : undefined;
 
   return (
     <Bezel
