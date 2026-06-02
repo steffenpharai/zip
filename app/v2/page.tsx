@@ -21,6 +21,8 @@ import { TelemetryPanel } from "@/components/v2/TelemetryPanel";
 import { ViewportFrame } from "@/components/v2/ViewportFrame";
 import { WorldView3D } from "@/components/v2/WorldView3D";
 
+import { camStreamUrl } from "@/lib/v2/brainUrl";
+import { useCameraSources } from "@/lib/v2/useCameraSources";
 import { useDriveInput } from "@/lib/v2/useDriveInput";
 import { useDriveTick } from "@/lib/v2/useDriveTick";
 import { useEventLog } from "@/lib/v2/useEventLog";
@@ -106,6 +108,11 @@ export default function V2Page() {
     [driveInput.axes.v, driveInput.axes.w],
   );
 
+  // ----- camera registry (poll /cam/list once on connect; re-poll every 5s)
+  const { sources: cameraSources } = useCameraSources(url, 5000);
+  const bowSource = cameraSources.find((s) => s.name === "bow");
+  const aftSource = cameraSources.find((s) => s.name === "aft");
+
   return (
     <HudShell
       mission={
@@ -161,9 +168,28 @@ export default function V2Page() {
               <WorldView3D axes={axes} ultrasonicCm={state.ultrasonicCm} />
             </ViewportFrame>
           </div>
-          {/* Compact camera strip BELOW the hero — fixed height regardless of column width */}
-          <div className="h-44 shrink-0">
-            <CameraFeed />
+          {/* Compact camera strip BELOW the hero — fixed height regardless of column width.
+              Phase 3.2 wires the BOW camera (Logitech C615) here; AFT (ESP32 OV2640)
+              will fill the right slot once Phase 3.3 lands. */}
+          <div className="h-44 shrink-0 grid grid-cols-3 gap-3">
+            <div className="col-span-2">
+              <CameraFeed
+                callsign="CAM // BOW"
+                label={
+                  bowSource ? `${bowSource.width}×${bowSource.height} · ${bowSource.fps}FPS · MJPG` : "—"
+                }
+                streamUrl={bowSource ? camStreamUrl(url, "bow") : undefined}
+              />
+            </div>
+            <div className="col-span-1">
+              <CameraFeed
+                callsign="CAM // AFT"
+                label={
+                  aftSource ? `${aftSource.width}×${aftSource.height} · ${aftSource.fps}FPS · MJPG` : "PHASE 3.3"
+                }
+                streamUrl={aftSource ? camStreamUrl(url, "aft") : undefined}
+              />
+            </div>
           </div>
         </>
       }
