@@ -177,6 +177,12 @@ export interface PlanStatusMsg {
   ts: number;
 }
 
+export interface MotionLockMsg {
+  type: "motion_lock";
+  /** true = wheels cannot be commanded (servo/scan unaffected). */
+  locked: boolean;
+}
+
 export type ServerMessage =
   | HelloMsg
   | TelemetryMsg
@@ -192,7 +198,8 @@ export type ServerMessage =
   | PoseMsg
   | OccupancyMsg
   | PlanPathMsg
-  | PlanStatusMsg;
+  | PlanStatusMsg
+  | MotionLockMsg;
 
 /* -------------------------------------------------------------------------- */
 /* HUD-side derived state                                                     */

@@ -205,6 +205,7 @@ export default function V2Page() {
           fps={fps}
           latencyMs={latency}
           uptimeS={uptime}
+          wheelsLocked={sensors.wheelsLocked}
           onReconnect={reconnect}
         />
       }

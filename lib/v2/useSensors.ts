@@ -11,9 +11,11 @@ export interface SensorsState {
   /** Latest servo-swept radar points. */
   scan: ScanPoint[];
   scanTs: number;
+  /** Wheel-motion safety lock (true = motors can't be commanded). */
+  wheelsLocked: boolean;
 }
 
-const EMPTY: SensorsState = { yawDeg: null, yawTs: 0, scan: [], scanTs: 0 };
+const EMPTY: SensorsState = { yawDeg: null, yawTs: 0, scan: [], scanTs: 0, wheelsLocked: false };
 
 /**
  * Subscribe to Phase 5 sensor streams (IMU heading + servo-swept radar) on the
@@ -36,6 +38,8 @@ export function useSensors(
         setState((s) => ({ ...s, yawDeg: m.yaw_deg, yawTs: m.ts }));
       } else if (m.type === "scan") {
         setState((s) => ({ ...s, scan: m.points, scanTs: m.ts }));
+      } else if (m.type === "motion_lock") {
+        setState((s) => ({ ...s, wheelsLocked: !!m.locked }));
       }
     });
     return unsub;

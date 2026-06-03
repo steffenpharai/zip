@@ -13,6 +13,7 @@ export function MissionBar({
   fps,
   latencyMs,
   uptimeS,
+  wheelsLocked = false,
   onReconnect,
 }: {
   connection: ConnectionState;
@@ -24,6 +25,7 @@ export function MissionBar({
   fps: number;
   latencyMs: number | null;
   uptimeS: number;
+  wheelsLocked?: boolean;
   onReconnect: () => void;
 }) {
   const conn = describeConnection(connection);
@@ -77,9 +79,18 @@ export function MissionBar({
       <div className="flex-1" />
 
       <Block label="MODE">
-        <span className="zip-num text-[12px] text-[var(--v2-amber)] zip-glow-amber">
-          MANUAL
-        </span>
+        {wheelsLocked ? (
+          <span
+            className="zip-num text-[12px] font-bold text-[var(--v2-rose)]"
+            style={{ textShadow: "0 0 8px var(--v2-rose)" }}
+          >
+            ⊘ WHEELS LOCKED
+          </span>
+        ) : (
+          <span className="zip-num text-[12px] text-[var(--v2-amber)] zip-glow-amber">
+            MANUAL
+          </span>
+        )}
       </Block>
 
       <Block label="RTT">
