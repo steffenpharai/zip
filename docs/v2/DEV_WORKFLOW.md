@@ -138,6 +138,45 @@ curl -s http://zip-esp32-cam.local:81/stream | xxd | head
 curl -s http://192.168.55.1:8080/cam/aft | xxd | head
 ```
 
+## Delegating Jetson-local work to a headless agent
+
+On-device environment bring-up (finding the right `onnxruntime-gpu` wheel for
+this JetPack, building + benchmarking a TensorRT engine) iterates far faster
+*on the Jetson* than over SSH from the PC. Phase 4 used a second Claude Code
+agent running headless on the Jetson for exactly that, in parallel with the
+PC-side build.
+
+```bash
+# Claude Code is installed for the `zip` user but NOT on the non-login PATH —
+# use the full path from SSH (non-login shell):
+JCLAUDE=/home/zip/.local/bin/claude
+
+# Dispatch a scoped, autonomous mission. Key points learned the hard way:
+#   - setsid (NOT just nohup) — a backgrounded SSH channel closing otherwise
+#     takes the process with it.
+#   - --output-format text only emits at the END; watch filesystem artifacts
+#     (a .venv appearing, *.engine, REPORT.md) for live progress, not the log.
+#   - scope it to a scratch dir and FORBID touching ~/zip / the live brain /
+#     /dev/video0 in the prompt — the robot is serving an operator.
+ssh zip-jetson 'cat > ~/lab/launcher.sh <<EOF
+#!/bin/bash
+cd ~/lab
+$JCLAUDE -p "$(cat MISSION.md)" --dangerously-skip-permissions --output-format text >> run.log 2>&1
+EOF
+chmod +x ~/lab/launcher.sh
+setsid ~/lab/launcher.sh </dev/null >/dev/null 2>&1 &'
+```
+
+Verify liveness with `ps -p <pid>` (not a fragile `cat pidfile | grep`
+pipeline — a bad extraction once made us think a healthy agent had died and
+spawn a colliding duplicate). Two agents in one scratch dir step on each
+other; if it happens, kill the newer one by *process group*
+(`kill -TERM -<pgid>`) after confirming its pgid differs from the survivor's.
+
+The agent's deliverable is a `REPORT.md` with the exact reproducible install
+commands + a self-contained module — integrate those into the brain rather
+than trusting the scratch venv directly.
+
 ## SSH config on the PC
 
 `~/.ssh/config` should have:

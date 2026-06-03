@@ -13,15 +13,18 @@ import { useCallback, useEffect, useMemo, useRef } from "react";
 
 import { AgentRail } from "@/components/v2/AgentRail";
 import { CameraFeed } from "@/components/v2/CameraFeed";
+import { DetectionOverlay } from "@/components/v2/DetectionOverlay";
 import { DrivePanel } from "@/components/v2/DrivePanel";
 import { EventLog } from "@/components/v2/EventLog";
 import { HudShell } from "@/components/v2/HudShell";
 import { MissionBar } from "@/components/v2/MissionBar";
+import { SnapshotGallery } from "@/components/v2/SnapshotGallery";
 import { TelemetryPanel } from "@/components/v2/TelemetryPanel";
 import { ViewportFrame } from "@/components/v2/ViewportFrame";
 import { WorldView3D } from "@/components/v2/WorldView3D";
 
-import { camStreamUrl } from "@/lib/v2/brainUrl";
+import { brainHttpBase, camStreamUrl } from "@/lib/v2/brainUrl";
+import { useDetections } from "@/lib/v2/useDetections";
 import { useCameraSources } from "@/lib/v2/useCameraSources";
 import { useDriveInput } from "@/lib/v2/useDriveInput";
 import { useDriveTick } from "@/lib/v2/useDriveTick";
@@ -78,6 +81,13 @@ export default function V2Page() {
   const bus = useParallelWsBus(url);
   const latency = useLatency(send, bus.register, 1500);
 
+  // ----- perception: detections overlay + captured-object gallery -----
+  const httpBase = useMemo(() => brainHttpBase(url), [url]);
+  const { frame: detFrame, snapshots, fresh: detFresh } = useDetections(
+    bus.register,
+    httpBase,
+  );
+
   // ----- sparkline series -----
   const battery = useSparkSeries(64);
   const ultrasonic = useSparkSeries(64);
@@ -116,6 +126,16 @@ export default function V2Page() {
       prevUno.current = state.unoConnected;
     }
   }, [state.connection, state.unoConnected, log]);
+
+  // ----- perception: report newly captured objects into the event log -----
+  const lastSnapIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    const newest = snapshots[0];
+    if (newest && newest.id !== lastSnapIdRef.current) {
+      lastSnapIdRef.current = newest.id;
+      log("info", `Sighted ${newest.label} (${Math.round(newest.confidence * 100)}%)`);
+    }
+  }, [snapshots, log]);
 
   // Memoize axes object identity so child renders are stable
   const axes = useMemo(
@@ -191,9 +211,14 @@ export default function V2Page() {
               <CameraFeed
                 callsign="CAM // BOW"
                 label={
-                  bowSource ? `${bowSource.width}×${bowSource.height} · ${bowSource.fps}FPS · MJPG` : "—"
+                  bowSource
+                    ? `${bowSource.width}×${bowSource.height} · ${detFrame.detections.length} OBJ${
+                        detFrame.backend ? ` · ${detFrame.backend}` : ""
+                      }`
+                    : "—"
                 }
                 streamUrl={bowSource ? camStreamUrl(url, "bow") : undefined}
+                overlay={<DetectionOverlay frame={detFrame} fresh={detFresh} />}
               />
             </div>
             <div className="col-span-1">
@@ -217,6 +242,7 @@ export default function V2Page() {
             onStop={stopOnce}
             send={send}
           />
+          <SnapshotGallery snapshots={snapshots} />
           <AgentRail />
         </div>
       }

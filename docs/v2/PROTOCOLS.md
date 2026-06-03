@@ -71,6 +71,7 @@ will be locked down in Phase 10.
 | `drive` | `{type:"drive", id?, v, w, ttl_ms}` | Forwards to UNO `N=200`. `v`, `w` are PWM units −255…255. |
 | `stop` | `{type:"stop", id?}` | Forwards to UNO `N=201`. |
 | `macro` | `{type:"macro", id?, macro_id ∈ {1..4}, intensity 0..255, ttl_ms}` | Forwards to UNO `N=210`. |
+| `perception` | `{type:"perception", id?, enabled}` | Toggle the detector at runtime (frees the GPU for SLAM). |
 | `ping` | `{type:"ping", id?}` | Server replies `pong`. |
 
 If `id` is present, the server includes it in the matching `ack`/`pong`
@@ -87,6 +88,8 @@ reply so the client can correlate.
 | `pong` | `{type:"pong", id?, ts}` | Reply to `ping`. |
 | `ack` | `{type:"ack", id?, ok, error?}` | Reply to any non-`ping` command. |
 | `error` | `{type:"error", error}` | Malformed inbound JSON. |
+| `detections` | `{type:"detections", detections:[{label, confidence, box:[x,y,w,h], class_id}], frame_w, frame_h, seq, ts, infer_ms, backend}` | Each perception frame (default 5 Hz). `box` is in `frame_w × frame_h` pixel coords. Replays latest on new subscribe. |
+| `snapshot` | `{type:"snapshot", id, label, confidence, box, w, h, ts}` | When the detector captures a confident object crop (per-label cooldown). Fetch the JPEG at `/perception/snapshot/{id}`. Stream-only, no replay. |
 
 **Sticky topics**: `telemetry.sample` and `uno.status` are *replayed* to
 new subscribers so a freshly-connected HUD doesn't sit at "—" for a
@@ -147,6 +150,26 @@ Content-Length: <bytes>\r\n
 The browser renders this natively in an `<img>` tag — no JS parser
 needed.
 
+**Capture-once fanout (Phase 4).** `/dev/video0` is single-open, so the
+Phase 3 "one GStreamer pipeline per consumer" model failed the moment two
+things wanted the same camera (two browser tabs, or the HUD + perception).
+`camera.py` now runs ONE upstream capture per camera (`CameraHub`), frames
+it into discrete JPEGs, and fans them out to all MJPEG clients *and* the
+perception loop. Capture is reference-counted — it starts on the first
+subscriber and stops on the last.
+
+## HTTP: Perception (Phase 4)
+
+| Endpoint | Returns |
+| --- | --- |
+| `GET /perception/state` | `{enabled, backend}` — detector on/off + active inference backend (e.g. `ort-trt-fp16`). |
+| `GET /perception/snapshots` | JSON array of captured-object metadata `[{id, label, confidence, box, w, h, ts}]`, newest last. |
+| `GET /perception/snapshot/{id}` | The JPEG crop for one capture. |
+
+Detections themselves are pushed over the WebSocket (`detections` /
+`snapshot` above), not polled. The HTTP routes exist for snapshot images
+and for a freshly-loaded HUD to backfill the gallery.
+
 ### `GET /health` — brain status
 
 ```json
@@ -197,3 +220,7 @@ network. They're the contract between the brain's own subsystems.
 | `uno.raw_out` | `uno_link.writer` | `control_plane.ws.outbound` | no |
 | `uno.status` | `uno_link` (connect/disconnect) | `control_plane.lifespan`, `control_plane.ws.outbound` | **yes** |
 | `telemetry.sample` | `uno_link.reader` | `control_plane.ws.outbound` | **yes** |
+| `perception.detections` | `perception.detect_loop` | `control_plane.ws.outbound` | **yes** |
+| `perception.snapshot` | `perception` (on capture) | `control_plane.ws.outbound` | no |
+| `perception.state` | `perception` (on toggle) | `control_plane` | no |
+| `client.perception.set` | `control_plane.ws.inbound` | `perception.control_loop` | no |

@@ -103,7 +103,14 @@ export function useZipBrain(opts: UseZipBrainOptions = {}): ZipBrain {
         case "ack":
         case "pong":
         case "error":
-          return s; // not surfaced into RobotState today (HUD logs may handle later)
+        case "detections":
+        case "snapshot":
+          return s; // handled elsewhere (latency hook / useDetections via the parallel bus)
+        default:
+          // Never return undefined from the reducer — an unknown/race-loaded
+          // message type would otherwise nuke RobotState and crash the next
+          // `s.rawLog` read. Ignore anything we don't recognise.
+          return s;
       }
     });
   }, []);

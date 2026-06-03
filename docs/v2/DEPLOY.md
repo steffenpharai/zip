@@ -160,6 +160,45 @@ EOF
 
 You should see `uno_connected: true`, `cameras: ["bow", "aft"]`.
 
+## Step 5b — Perception backend (Phase 4)
+
+YOLO11 runs on the Jetson via `onnxruntime-gpu` (CUDA EP). The brain venv
+needs three things the base install doesn't have: system OpenCV, numpy 1.26,
+and onnxruntime-gpu.
+
+```bash
+ssh zip-jetson 'bash -s' << 'EOF'
+# 1. Let the brain venv see the system OpenCV (apt cv2 4.8, no rebuild):
+sed -i "s/include-system-site-packages = false/include-system-site-packages = true/" ~/zip/.venv/pyvenv.cfg
+
+# 2. numpy 1.26 (system numpy 1.21 is too old for onnxruntime 1.24) + the
+#    onnxruntime-gpu Jetson wheel. The jetson-ai-lab index is the source;
+#    the .dev host is flaky — .io is the working mirror.
+~/zip/.venv/bin/pip install "numpy==1.26.4"
+~/zip/.venv/bin/pip install onnxruntime-gpu==1.24.0 \
+  --extra-index-url https://pypi.jetson-ai-lab.io/jp6/cu126
+
+# 3. Place the model where the brain expects it:
+mkdir -p ~/zip/models
+#   copy yolo11n.onnx (Ultralytics YOLO11-nano ONNX export) to:
+cp /path/to/yolo11n.onnx ~/zip/models/yolo11n.onnx
+
+# 4. Snapshots need a writable dir — ~/zip is read-only under the unit's
+#    ProtectHome. The unit's StateDirectory=zip provides /var/lib/zip; the
+#    ZIP_PERCEPTION_SNAPSHOT_DIR env (drop-in) points there.
+sudo systemctl daemon-reload && sudo systemctl restart zip-brain
+EOF
+```
+
+Verify: `curl -s http://192.168.55.1:8080/perception/state` →
+`{"enabled":true,"backend":"ort-cuda"}`. The brain log shows
+`detector: onnxruntime ready (ort-cuda)` and `perception: detect loop start`.
+
+> TensorRT EP (FP16) is ~2× faster but its first-run engine build takes
+> minutes and the cache dir must be writable. It's gated off by default
+> (`ZIP_PERCEPTION_TRT=0`); CUDA EP is ~31 fps standalone, far over the 5 Hz
+> the loop runs at. Enable later once a warm cache exists.
+
 ## Step 6 — Start the HUD on the PC
 
 ```bash
@@ -213,4 +252,7 @@ timeout 3 curl -s http://192.168.55.1:8080/cam/aft | grep -c $'\xff\xd8'
 
 # 5. ESP32 directly
 ssh zip-jetson 'curl -s http://zip-esp32-cam.local:81/health'
+
+# 6. Perception is up and on the GPU
+curl -s http://192.168.55.1:8080/perception/state   # {"enabled":true,"backend":"ort-cuda"}
 ```

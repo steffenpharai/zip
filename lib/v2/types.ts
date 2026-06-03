@@ -22,7 +22,8 @@ export type ClientMessage =
       intensity: number;
       ttl_ms: number;
     }
-  | { type: "ping"; id?: string };
+  | { type: "ping"; id?: string }
+  | { type: "perception"; id?: string; enabled: boolean };
 
 /* -------------------------------------------------------------------------- */
 /* Server → Client                                                            */
@@ -75,6 +76,40 @@ export interface ErrorMsg {
   error: string;
 }
 
+/* -------------------------------------------------------------------------- */
+/* Perception (Phase 4)                                                       */
+/* -------------------------------------------------------------------------- */
+
+export interface Detection {
+  label: string;
+  confidence: number;
+  /** [x, y, w, h] in the detector's frame pixel coords (frame_w × frame_h). */
+  box: [number, number, number, number];
+  class_id: number;
+}
+
+export interface DetectionsMsg {
+  type: "detections";
+  detections: Detection[];
+  frame_w: number;
+  frame_h: number;
+  seq: number;
+  ts: number;
+  infer_ms: number;
+  backend: string;
+}
+
+export interface SnapshotMsg {
+  type: "snapshot";
+  id: string;
+  label: string;
+  confidence: number;
+  box: [number, number, number, number];
+  w: number;
+  h: number;
+  ts: number;
+}
+
 export type ServerMessage =
   | HelloMsg
   | TelemetryMsg
@@ -82,7 +117,9 @@ export type ServerMessage =
   | UnoRawMsg
   | PongMsg
   | AckMsg
-  | ErrorMsg;
+  | ErrorMsg
+  | DetectionsMsg
+  | SnapshotMsg;
 
 /* -------------------------------------------------------------------------- */
 /* HUD-side derived state                                                     */

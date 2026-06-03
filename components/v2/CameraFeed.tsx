@@ -17,11 +17,14 @@ export function CameraFeed({
   callsign = "CAM // BOW",
   label = "C615 · 640×480 · MJPG",
   streamUrl,
+  overlay,
 }: {
   callsign?: string;
   label?: string;
   /** Undefined → "no signal" placeholder. */
   streamUrl?: string;
+  /** Optional absolutely-positioned layer over the video (e.g. detection boxes). */
+  overlay?: React.ReactNode;
 }) {
   // `bust` is bumped ONLY on stream error. We deliberately do NOT bump it
   // when streamUrl first becomes defined or when the component re-renders:
@@ -87,6 +90,9 @@ export function CameraFeed({
         ) : (
           <NoSignalSurface />
         )}
+
+        {/* Detection overlay (or any caller-supplied layer) sits above the video. */}
+        {streamUrl && overlay}
 
         {/* LIVE pip */}
         {streamUrl && (

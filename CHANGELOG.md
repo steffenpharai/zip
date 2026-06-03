@@ -4,6 +4,32 @@ ZIP V2 — every commit is in git; this file calls out only the notable
 shipped milestones. V1 history is preserved at
 [steffenpharai/Zip](https://github.com/steffenpharai/Zip).
 
+## [V2 / Phase 4 — Perception (object detection)] — 2026-06-02
+
+The robot sees. YOLO11-nano runs on the Jetson; detections overlay the BOW
+camera in the HUD and confident sightings are captured to a gallery.
+
+- **Inference on the Jetson** via `onnxruntime-gpu` with the TensorRT
+  execution provider (FP16) + persistent engine cache; CUDA EP and OpenCV-DNN
+  CPU are automatic fallbacks. CUDA EP benchmarked at ~31 fps / 32 ms on
+  `bus.jpg` with correct detections — far over the 5 Hz the loop runs at.
+- **Capture-once camera fanout** (`camera.py` `CameraHub`): one upstream
+  capture per camera, framed into JPEGs, fanned to all MJPEG clients *and*
+  perception. Fixes the single-open `/dev/video0` "Device busy" failure that
+  also bit two browser tabs.
+- **Brain**: `perception.py` (frame loop, off-event-loop inference, per-label
+  snapshot cooldown) + `detector.py` (pluggable backend: onnxruntime-gpu →
+  OpenCV-DNN CPU fallback, shared YOLO11 letterbox/parse/NMS). New bus topics
+  `perception.detections` / `perception.snapshot`; WS envelopes `detections` /
+  `snapshot`; HTTP `/perception/{state,snapshots,snapshot/{id}}`; runtime
+  on/off toggle to free the GPU for SLAM.
+- **HUD**: `DetectionOverlay` (SVG boxes, viewBox-matched to object-contain),
+  `SnapshotGallery` (captured object crops), sightings into the event log.
+- **Process**: the Jetson-side ML environment bring-up (onnxruntime-gpu wheel,
+  TRT engine build + benchmark) was delegated to a Claude Code agent running
+  headless on the Jetson, in parallel with the PC-side build. See
+  `docs/v2/DEV_WORKFLOW.md`.
+
 ## [V2 / Phase 3.5 — Drive latency squeeze] — 2026-06-02
 
 End-to-end **keydown → motor at full speed** cut from ~300 ms to ~70 ms.

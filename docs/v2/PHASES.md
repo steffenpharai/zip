@@ -88,25 +88,80 @@ Round 2:
 
 Final budget: ~70 ms keydown → motor at full target PWM.
 
+### Phase 4 — Perception (object detection) ✅
+
+The robot now sees. YOLO11-nano runs on the Jetson, detections overlay the
+BOW camera in the HUD, and confident sightings are captured to a gallery.
+
+- **Inference on the Jetson** (per the "Jetson is the brain" lock): YOLO11n
+  via `onnxruntime-gpu` with the **TensorRT execution provider (FP16)** and a
+  persistent engine cache — the multi-minute engine build happens once. CUDA
+  EP then OpenCV-DNN CPU are automatic fallbacks, so the brain always boots.
+- **Camera fanout hub**: `/dev/video0` is single-open, so Phase 3's
+  one-pipeline-per-consumer model broke whenever two things wanted the camera.
+  `camera.py` now captures once per camera and fans frames out to all MJPEG
+  clients *and* the perception loop. Also fixes the latent two-tabs bug.
+- **Brain**: new `perception.py` task + `detector.py` (pluggable backend) pull
+  frames from the hub, run detection off the event loop (executor), and
+  publish `perception.detections` (5 Hz) + `perception.snapshot` on the bus.
+  Snapshots dedupe per-label with a cooldown.
+- **HUD**: `DetectionOverlay` (SVG boxes scaled via viewBox to match
+  object-contain), `SnapshotGallery` (captured object crops), detections
+  reported into the event log. Runtime on/off toggle frees the GPU for SLAM.
+
+The on-Jetson environment bring-up (finding the right onnxruntime-gpu wheel,
+building + benchmarking the TRT engine) was done by a **delegated Claude Code
+agent running headless on the Jetson itself**, while the PC-side code was
+built in parallel — see DEV_WORKFLOW.
+
 ## In flight
 
-Nothing right now. Last shipped item was the latency squeeze + this
-documentation pass.
+Nothing right now. Last shipped item was Phase 4 perception.
 
 ## Queued — next candidate phases
 
-### Phase 4 — Voice loop
+> **Roadmap re-sequenced (indoor mapping robot).** The vision is an indoor
+> robot that drives the office/rooms, identifies objects, maps + reconstructs
+> the space, and is viewable/controllable remotely. Perception (Phase 4)
+> shipped first as the fast, low-risk, high-value win. SLAM is the autonomy
+> spine and comes next. **Voice moved late** — it's additive, not load-bearing
+> for the core "see / map / patrol / watch remotely" loop.
 
-- Wake word: `openWakeWord`, custom "Hey Zip" model (locked decision).
-- STT: `faster-whisper` (Medium) running on PC GPU.
-- TTS: Piper local, or OpenAI Realtime if we want lower-latency cloud.
-- Architecture: voice runs *client-side* (browser-side STT/TTS) so any
-  client can speak, not just the PC. Robot-side mic is Phase 4.5 if we
-  want it.
-- Hooks needed in HUD: push-to-talk button, transcript display, agent
-  message stream.
+### Phase 5 — SLAM + live reconstruction
 
-### Phase 5 — Agent skeleton
+- MASt3R-SLAM (TensorRT) on the Jetson, fed from the BOW camera — chosen for
+  indoor texture-poor rooms, the exact target environment.
+- Pose + sparse map on the internal bus; the HUD 3D viewport renders the room
+  as it's built ("real-time reconstruction").
+- Compute budget: SLAM + perception can't both run flat-out on the 7.6 GB
+  Jetson. Decide drive-and-scan vs stop-and-scan here; the perception runtime
+  toggle (Phase 4) is the lever. Headless Jetson (no desktop) reclaims ~2.5 GB.
+
+### Phase 6 — Anchored detections
+
+- Fuse perception + SLAM: pin detections to map coordinates. "I see a chair"
+  becomes "there's a chair in the NE corner." "Where did you last see X."
+- Persisted to SQLite as a queryable object registry.
+
+### Phase 7 — Autonomous exploration
+
+- Frontier-based coverage so the robot drives itself through the rooms,
+  mapping as it goes. Reactive obstacle stop via ultrasonic + visual clearance.
+
+### Phase 8 — Cloud reachability + auth
+
+- Tailscale Funnel / Cloudflare Tunnel: HUD + camera reachable from anywhere
+  ("check on my space when I'm not home"). Auth from here on; `*` CORS locked.
+
+### Phase 9 — Voice loop (moved later)
+
+- Conversational layer. Local-only on the Jetson per the "robot stays
+  autonomous" lock: Pipecat-style cascade (Parakeet/whisper STT → local
+  Qwen-Instruct with tool calls → Piper TTS), or a full-duplex speech model.
+  Push-to-talk first, wake word ("Hey Zip") after. Additive — slots in
+  whenever; doesn't block the mapping spine.
+
+### Phase 10 — Agent skeleton (formerly Phase 5)
 
 - LLM brain via Claude API on the Jetson (per the locked-in hybrid LLM
   decision — local model is too tight on the 8 GB Jetson when SLAM
