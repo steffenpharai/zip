@@ -9,7 +9,7 @@
  * will inherit when their data flows land in later phases.
  */
 
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { AgentRail } from "@/components/v2/AgentRail";
 import { CameraFeed } from "@/components/v2/CameraFeed";
@@ -18,6 +18,7 @@ import { DrivePanel } from "@/components/v2/DrivePanel";
 import { EventLog } from "@/components/v2/EventLog";
 import { HudShell } from "@/components/v2/HudShell";
 import { MissionBar } from "@/components/v2/MissionBar";
+import { RadarPanel } from "@/components/v2/RadarPanel";
 import { SnapshotGallery } from "@/components/v2/SnapshotGallery";
 import { TelemetryPanel } from "@/components/v2/TelemetryPanel";
 import { ViewportFrame } from "@/components/v2/ViewportFrame";
@@ -25,6 +26,7 @@ import { WorldView3D } from "@/components/v2/WorldView3D";
 
 import { brainHttpBase, camStreamUrl } from "@/lib/v2/brainUrl";
 import { useDetections } from "@/lib/v2/useDetections";
+import { useSensors } from "@/lib/v2/useSensors";
 import { useCameraSources } from "@/lib/v2/useCameraSources";
 import { useDriveInput } from "@/lib/v2/useDriveInput";
 import { useDriveTick } from "@/lib/v2/useDriveTick";
@@ -86,6 +88,17 @@ export default function V2Page() {
   const { frame: detFrame, snapshots, fresh: detFresh } = useDetections(
     bus.register,
     httpBase,
+  );
+
+  // ----- Phase 5 sensors: IMU heading + servo-swept radar -----
+  const sensors = useSensors(bus.register);
+  const [scanning, setScanning] = useState(false);
+  const toggleScan = useCallback(
+    (on: boolean) => {
+      setScanning(on);
+      send({ type: "scan", enabled: on });
+    },
+    [send],
   );
 
   // ----- sparkline series -----
@@ -241,6 +254,12 @@ export default function V2Page() {
             onJoystick={driveInput.setJoystick}
             onStop={stopOnce}
             send={send}
+          />
+          <RadarPanel
+            scan={sensors.scan}
+            yawDeg={sensors.yawDeg}
+            scanning={scanning}
+            onToggleScan={toggleScan}
           />
           <SnapshotGallery snapshots={snapshots} />
           <AgentRail />

@@ -127,15 +127,20 @@ Nothing right now. Last shipped item was Phase 4 perception.
 > spine and comes next. **Voice moved late** — it's additive, not load-bearing
 > for the core "see / map / patrol / watch remotely" loop.
 
-### Phase 5 — SLAM + live reconstruction
+### Phase 5 — Mapping, localization & trajectory planning (fusion-first)
 
-- MASt3R-SLAM (TensorRT) on the Jetson, fed from the BOW camera — chosen for
-  indoor texture-poor rooms, the exact target environment.
-- Pose + sparse map on the internal bus; the HUD 3D viewport renders the room
-  as it's built ("real-time reconstruction").
-- Compute budget: SLAM + perception can't both run flat-out on the 7.6 GB
-  Jetson. Decide drive-and-scan vs stop-and-scan here; the perception runtime
-  toggle (Phase 4) is the lever. Headless Jetson (no desktop) reclaims ~2.5 GB.
+Full plan: [`PHASE5_PLAN.md`](./PHASE5_PLAN.md).
+
+- **MASt3R-SLAM un-locked** — too heavy for an 8 GB Orin Nano with a single
+  mono webcam (real-time only on 3090/4090-class GPUs). Dense neural
+  reconstruction moves to the offline PC path (Phase 11).
+- Instead: **fuse the sensors we already have** — MPU6050 IMU (heading),
+  servo-swept HC-SR04 (metric occupancy), commanded odometry — into a 2D pose +
+  occupancy map, then a grid planner for trajectories. No GPU/torch to start.
+- The camera (mono VIO + Depth-Anything cloud + loop closure) is layered *last*
+  for accuracy/richness, after a working navigate-the-room loop exists.
+- The occupancy + planner + HUD layers are sensor-independent, so a future
+  RGB-D+IMU camera swaps only the front-end.
 
 ### Phase 6 — Anchored detections
 
@@ -223,8 +228,11 @@ Nothing right now. Last shipped item was Phase 4 perception.
 - **Hybrid LLM**, weighted toward API (Claude). Local model only for
   routing + offline-tolerant basic responses.
 - **Wake word + conversation** voice style; "Hey Zip".
-- **MASt3R-SLAM** for V1 SLAM (better than DROID-SLAM for indoor
-  texture-poor rooms, lighter on VRAM).
+- ~~**MASt3R-SLAM** for V1 SLAM~~ — **REVERSED** (Phase 5 planning). Too heavy
+  for an 8 GB Orin Nano + mono webcam. V1 mapping is sensor-fusion
+  (IMU + servo-swept ultrasonic + odometry) with the camera layered last;
+  dense neural reconstruction is an offline PC job (Phase 11). See
+  [`PHASE5_PLAN.md`](./PHASE5_PLAN.md).
 - **Manual flash of new firmware via existing toolchain** (PlatformIO
   + avrdude); no OTA in V1.
 - **`secrets.h` is gitignored everywhere.** Templates go in

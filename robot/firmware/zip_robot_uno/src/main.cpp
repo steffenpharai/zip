@@ -40,6 +40,7 @@
  *   N=21    Ultrasonic read
  *   N=22    Line sensor read
  *   N=23    Battery voltage
+ *   N=24    IMU heading (yaw, deci-degrees)
  *   N=120   Diagnostics (includes IMU status, HW profile)
  *   N=200   Setpoint streaming (fire-and-forget)
  *   N=201   Stop (immediate)
@@ -488,10 +489,22 @@ void handleLegacyCommand(const ParsedCommand& cmd) {
       return;
     }
     
+    case 24: {
+      // N=24: IMU heading (ZIP extension, Phase 5)
+      // Returns the complementary-filtered yaw in deci-degrees (yaw * 10),
+      // signed, e.g. {imu_-451} = -45.1 deg. Brain divides by 10.
+      imu.update();
+      int16_t yaw_dd = (int16_t)(imu.getYaw() * 10.0f);
+      char valueStr[8];
+      snprintf(valueStr, sizeof(valueStr), "%d", yaw_dd);
+      JsonProtocol::sendValue(cmd.H, valueStr);
+      return;
+    }
+
     default:
       break;
   }
-  
+
   // Commands 2 and 7 have delayed response in official firmware
   // (they respond after timer expires)
   if (cmd.N == 2 || cmd.N == 7) {

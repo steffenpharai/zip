@@ -23,7 +23,8 @@ export type ClientMessage =
       ttl_ms: number;
     }
   | { type: "ping"; id?: string }
-  | { type: "perception"; id?: string; enabled: boolean };
+  | { type: "perception"; id?: string; enabled?: boolean; snapshots?: boolean }
+  | { type: "scan"; id?: string; enabled: boolean };
 
 /* -------------------------------------------------------------------------- */
 /* Server → Client                                                            */
@@ -110,6 +111,29 @@ export interface SnapshotMsg {
   ts: number;
 }
 
+/* -------------------------------------------------------------------------- */
+/* Sensor fusion (Phase 5)                                                    */
+/* -------------------------------------------------------------------------- */
+
+export interface ImuMsg {
+  type: "imu";
+  /** Fused yaw in degrees (complementary filter on the MPU6050). */
+  yaw_deg: number;
+  ts: number;
+}
+
+export interface ScanPoint {
+  /** Servo pan angle in degrees, 0–180 (90 = straight ahead). */
+  angle: number;
+  distance_cm: number;
+}
+
+export interface ScanMsg {
+  type: "scan";
+  points: ScanPoint[];
+  ts: number;
+}
+
 export type ServerMessage =
   | HelloMsg
   | TelemetryMsg
@@ -119,7 +143,9 @@ export type ServerMessage =
   | AckMsg
   | ErrorMsg
   | DetectionsMsg
-  | SnapshotMsg;
+  | SnapshotMsg
+  | ImuMsg
+  | ScanMsg;
 
 /* -------------------------------------------------------------------------- */
 /* HUD-side derived state                                                     */
