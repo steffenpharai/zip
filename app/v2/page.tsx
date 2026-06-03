@@ -13,6 +13,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { AgentRail } from "@/components/v2/AgentRail";
 import { CameraFeed } from "@/components/v2/CameraFeed";
+import { DepthPanel } from "@/components/v2/DepthPanel";
 import { DetectionOverlay } from "@/components/v2/DetectionOverlay";
 import { DrivePanel } from "@/components/v2/DrivePanel";
 import { EventLog } from "@/components/v2/EventLog";
@@ -307,6 +308,7 @@ export default function V2Page() {
             onToggleScan={toggleScan}
           />
           <SnapshotGallery snapshots={snapshots} />
+          <DepthPanel httpBase={httpBase} />
           <AgentRail />
         </div>
       }
