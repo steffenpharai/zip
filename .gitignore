@@ -72,6 +72,9 @@ public/avatars/*.vrm
 vrm_*.json
 vrm_*.txt
 
+# === Secrets — never tracked, anywhere ===
+**/secrets.h
+
 # === Editor / OS ===
 .DS_Store
 *.pem
