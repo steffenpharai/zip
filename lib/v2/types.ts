@@ -24,7 +24,9 @@ export type ClientMessage =
     }
   | { type: "ping"; id?: string }
   | { type: "perception"; id?: string; enabled?: boolean; snapshots?: boolean }
-  | { type: "scan"; id?: string; enabled: boolean };
+  | { type: "scan"; id?: string; enabled: boolean }
+  | { type: "goto"; id?: string; x: number; y: number }
+  | { type: "goto_cancel"; id?: string };
 
 /* -------------------------------------------------------------------------- */
 /* Server → Client                                                            */
@@ -153,6 +155,28 @@ export interface OccupancyMsg {
   ts: number;
 }
 
+export interface PlanPathMsg {
+  type: "plan_path";
+  /** World-metre waypoints. */
+  points: [number, number][];
+  goal: [number, number] | null;
+  ts: number;
+}
+
+export type PlanState =
+  | "idle"
+  | "planning"
+  | "following"
+  | "reached"
+  | "blocked"
+  | "no_path";
+
+export interface PlanStatusMsg {
+  type: "plan_status";
+  state: PlanState;
+  ts: number;
+}
+
 export type ServerMessage =
   | HelloMsg
   | TelemetryMsg
@@ -166,7 +190,9 @@ export type ServerMessage =
   | ImuMsg
   | ScanMsg
   | PoseMsg
-  | OccupancyMsg;
+  | OccupancyMsg
+  | PlanPathMsg
+  | PlanStatusMsg;
 
 /* -------------------------------------------------------------------------- */
 /* HUD-side derived state                                                     */

@@ -27,6 +27,7 @@ import { brainHttpBase, camStreamUrl } from "@/lib/v2/brainUrl";
 import { MapView } from "@/components/v2/MapView";
 import { useDetections } from "@/lib/v2/useDetections";
 import { useMap } from "@/lib/v2/useMap";
+import { usePlan } from "@/lib/v2/usePlan";
 import { useSensors } from "@/lib/v2/useSensors";
 import { useCameraSources } from "@/lib/v2/useCameraSources";
 import { useDriveInput } from "@/lib/v2/useDriveInput";
@@ -38,6 +39,22 @@ import { useParallelWsBus } from "@/lib/v2/useServerMessages";
 import { useSparkSeries } from "@/lib/v2/useSparkSeries";
 import { useUptime } from "@/lib/v2/useUptime";
 import { useZipBrain } from "@/lib/v2/useZipBrain";
+
+function planStateColor(state: string): string {
+  switch (state) {
+    case "following":
+      return "var(--v2-green)";
+    case "planning":
+      return "var(--v2-amber)";
+    case "blocked":
+    case "no_path":
+      return "var(--v2-rose)";
+    case "reached":
+      return "var(--v2-cyan-bright)";
+    default:
+      return "var(--v2-text-dim)";
+  }
+}
 
 export default function V2Page() {
   const { state, send, reconnect, url } = useZipBrain();
@@ -94,6 +111,18 @@ export default function V2Page() {
   // ----- Phase 5 sensors: IMU heading + servo-swept radar -----
   const sensors = useSensors(bus.register);
   const mapState = useMap(bus.register);
+  const plan = usePlan(bus.register);
+  const onPickGoal = useCallback(
+    (x: number, y: number) => {
+      send({ type: "goto", x, y });
+      log("cmd", `GOTO x ${x.toFixed(2)} y ${y.toFixed(2)}`);
+    },
+    [send, log],
+  );
+  const cancelGoto = useCallback(() => {
+    send({ type: "goto_cancel" });
+    log("warn", "GOTO cancelled");
+  }, [send, log]);
   const [scanning, setScanning] = useState(false);
   const toggleScan = useCallback(
     (on: boolean) => {
@@ -196,7 +225,16 @@ export default function V2Page() {
               callsign="VIEW // MAP"
               topRight={
                 <>
-                  <span>OCCUPANCY · 5CM</span>
+                  <span style={{ color: planStateColor(plan.state) }}>{plan.state.toUpperCase()}</span>
+                  {plan.goal && (
+                    <button
+                      type="button"
+                      onClick={cancelGoto}
+                      className="zip-label text-[9px] text-[var(--v2-rose)] border border-[var(--v2-panel-edge)] hover:border-[var(--v2-rose)] px-1.5 rounded-sm pointer-events-auto"
+                    >
+                      ✕ CANCEL
+                    </button>
+                  )}
                   <span className="zip-num text-[var(--v2-text)]">{mapState.occupied.length} cells</span>
                 </>
               }
@@ -219,7 +257,7 @@ export default function V2Page() {
                 </>
               }
             >
-              <MapView map={mapState} />
+              <MapView map={mapState} path={plan.path} goal={plan.goal} onPick={onPickGoal} />
             </ViewportFrame>
           </div>
           {/* Compact camera strip BELOW the hero — fixed height regardless of column width.

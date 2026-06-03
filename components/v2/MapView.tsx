@@ -14,7 +14,18 @@ const PAD = 50;
  * This is the live "the room builds as you drive" view — the seed for the
  * trajectory planner (5.2). Dense/visual reconstruction comes in 5.3.
  */
-export function MapView({ map }: { map: MapState }) {
+export function MapView({
+  map,
+  path = [],
+  goal = null,
+  onPick,
+}: {
+  map: MapState;
+  path?: [number, number][];
+  goal?: [number, number] | null;
+  /** Click-to-set-goal: called with world (x,y) metres. */
+  onPick?: (x: number, y: number) => void;
+}) {
   const { occupied, cellM, pose } = map;
 
   // World extent from occupied cells + robot, with padding; sane default if empty.
@@ -42,11 +53,48 @@ export function MapView({ map }: { map: MapState }) {
 
   const empty = occupied.length === 0 && !pose;
 
+  const handleClick = (e: React.MouseEvent<SVGSVGElement>) => {
+    if (!onPick) return;
+    const svg = e.currentTarget;
+    const ctm = svg.getScreenCTM();
+    if (!ctm) return;
+    const pt = svg.createSVGPoint();
+    pt.x = e.clientX;
+    pt.y = e.clientY;
+    const v = pt.matrixTransform(ctm.inverse()); // → viewBox coords
+    onPick(minX + (v.x - PAD) / scale, minY + (H - v.y - PAD) / scale);
+  };
+
   return (
     <div className="w-full h-full flex items-center justify-center bg-[#050B11]">
-      <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-full" preserveAspectRatio="xMidYMid meet">
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        className="w-full h-full"
+        preserveAspectRatio="xMidYMid meet"
+        onClick={handleClick}
+        style={{ cursor: onPick ? "crosshair" : "default" }}
+      >
         {/* faint world grid every 0.5 m */}
         <Grid minX={minX} maxX={maxX} minY={minY} maxY={maxY} sx={sx} sy={sy} />
+
+        {/* planned path */}
+        {path.length > 1 && (
+          <polyline
+            points={path.map(([wx, wy]) => `${sx(wx).toFixed(1)},${sy(wy).toFixed(1)}`).join(" ")}
+            fill="none"
+            stroke="var(--v2-green)"
+            strokeWidth={2}
+            strokeDasharray="6 4"
+            opacity={0.9}
+          />
+        )}
+        {goal && (
+          <g transform={`translate(${sx(goal[0])},${sy(goal[1])})`}>
+            <circle r={7} fill="none" stroke="var(--v2-green)" strokeWidth={1.5} />
+            <line x1={-9} y1={0} x2={9} y2={0} stroke="var(--v2-green)" strokeWidth={1} />
+            <line x1={0} y1={-9} x2={0} y2={9} stroke="var(--v2-green)" strokeWidth={1} />
+          </g>
+        )}
 
         {/* occupied cells */}
         {occupied.map(([cx, cy], i) => (
