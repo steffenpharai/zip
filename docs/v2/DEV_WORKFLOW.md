@@ -80,7 +80,7 @@ ssh zip-jetson '
 ```
 
 **The bootloader baud is always 115200**, independent of the runtime
-`SERIAL_BAUD`. Don't try to flash at 460800.
+`SERIAL_BAUD`. Don't try to flash at 500000.
 
 To tune runtime parameters without touching code, prefer build flags
 in `platformio.ini` over editing the headers — the headers are also

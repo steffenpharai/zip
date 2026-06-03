@@ -30,7 +30,7 @@ export function EventLog({
         </Bezel>
       </div>
       <div className="col-span-2">
-        <Bezel callsign="LOG // UART" meta="115200 · /dev/ttyUSB0" index={6}>
+        <Bezel callsign="LOG // UART" meta="500000 · /dev/ttyUSB0" index={6}>
           <UartConsole rawLog={rawLog} />
         </Bezel>
       </div>

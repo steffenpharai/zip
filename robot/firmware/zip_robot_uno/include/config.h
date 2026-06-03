@@ -16,8 +16,11 @@
 #include "board/board_elegoo_uno_smartcar_shield_v11.h"
 
 // Serial Communication
-// Note: Official ELEGOO uses 9600, we use 115200 for better performance
+// Note: Official ELEGOO uses 9600, we use 115200 for better performance.
+// Guard so platformio.ini build flags can override (V2 latency tuning bumps this to 460800).
+#ifndef SERIAL_BAUD
 #define SERIAL_BAUD 115200
+#endif
 
 // RX Ring Buffer Size (must be power of 2) - minimal for UNO
 // 32 bytes is minimum for basic JSON commands
@@ -33,8 +36,10 @@
 #define PROTOCOL_MAX_PAYLOAD_SIZE 24  // Minimal for UNO RAM constraints
 #define PROTOCOL_MAX_FRAME_SIZE (4 + PROTOCOL_MAX_PAYLOAD_SIZE + 2)
 
-// Task Frequencies (Hz)
+// Task Frequencies (Hz). Guard so build flags can override (V2 latency tuning runs at 100 Hz).
+#ifndef TASK_CONTROL_LOOP_HZ
 #define TASK_CONTROL_LOOP_HZ 50  // Motion controller updates at 50Hz (20ms cadence)
+#endif
 #define TASK_SENSORS_FAST_HZ 50
 #define TASK_SENSORS_SLOW_HZ 10
 #define TASK_TELEMETRY_HZ 0  // DISABLED - telemetry flooding serial port

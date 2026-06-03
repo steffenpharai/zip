@@ -79,8 +79,12 @@ Round 2:
   key press, no rAF or React render wait.
 - UNO `TASK_CONTROL_LOOP_HZ` 50 → 100 (halves loop-tick wait, doubles
   effective ramp velocity to 3000 PWM/s).
-- UART 115200 → 460800 baud (50-byte setpoint: 4.5 ms → 1.1 ms on the
-  wire).
+- UART 115200 → 500000 baud (50-byte setpoint: 4.5 ms → 1.0 ms on the
+  wire). 500000 = UBRR=3 (U2X=1) on the ATmega328P @ 16 MHz, which is
+  *exactly* what UBRR=3 produces — zero baud error. (The first attempt
+  targeted 460800, but 460800 rounds to the same UBRR=3 setting and is
+  8.5% off the requested rate, well past UART tolerance, so it produced
+  pure line noise in both directions.)
 
 Final budget: ~70 ms keydown → motor at full target PWM.
 

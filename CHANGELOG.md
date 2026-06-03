@@ -18,8 +18,15 @@ End-to-end **keydown → motor at full speed** cut from ~300 ms to ~70 ms.
   with the ramp bump, the practical ramp is 600 PWM/s → 3000 PWM/s).
 - UNO firmware `KICKSTART_BOOST` 25 → 40 to break static friction
   immediately on the first setpoint after a stop.
-- UART baud 115200 → 460800 on both UNO firmware and the Jetson
-  `zip-brain` systemd env. 50-byte setpoint: 4.5 ms → 1.1 ms on the wire.
+- UART baud 115200 → 500000 on both UNO firmware and the Jetson
+  `zip-brain` systemd env. 50-byte setpoint: 4.5 ms → 1.0 ms on the
+  wire. (The original commit targeted 460800, which the ATmega328P @
+  16 MHz cannot produce — UBRR=3 actually yields 500000 baud, an 8.5%
+  delta well past UART tolerance. Plus two `#define` shadow bugs in
+  `config.h` silently overrode the `-DSERIAL_BAUD=` and
+  `-DTASK_CONTROL_LOOP_HZ=` build flags back to V1 defaults. Both
+  fixed here: guards added, target baud realigned to an achievable
+  exact UBRR value.)
 
 ## [V2 / Phase 3.3 — ESP32-S3 OV2640 as second camera] — 2026-06-02
 

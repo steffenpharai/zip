@@ -10,7 +10,7 @@ status holds only if the two stay in sync.
 HUD (Next.js/React)
    ⇅ WebSocket JSON envelopes — port 8080
 zip-brain (FastAPI on Jetson, port 8080)
-   ⇅ UART JSON lines — /dev/ttyUSB0 @ 460800 baud
+   ⇅ UART JSON lines — /dev/ttyUSB0 @ 500000 baud
 UNO motion controller (Arduino, ATmega328P)
 
 zip-brain (FastAPI on Jetson, port 8080)
@@ -22,7 +22,7 @@ zip-brain (aiohttp client)
 ESP32-S3 OV2640 (ESP-IDF httpd)
 ```
 
-## UART: zip-brain ↔ UNO (port 8080 internal · `/dev/ttyUSB0` @ 460800 baud)
+## UART: zip-brain ↔ UNO (port 8080 internal · `/dev/ttyUSB0` @ 500000 baud)
 
 JSON lines, one per command/response, terminated by `\n`. The protocol is
 inherited from the V1 firmware unchanged.

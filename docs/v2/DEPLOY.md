@@ -143,7 +143,7 @@ sudo systemctl enable zip-brain.service
 sudo mkdir -p /etc/systemd/system/zip-brain.service.d
 sudo tee /etc/systemd/system/zip-brain.service.d/uart.conf >/dev/null <<UNIT
 [Service]
-Environment="ZIP_UNO_BAUD=460800"
+Environment="ZIP_UNO_BAUD=500000"
 UNIT
 sudo tee /etc/systemd/system/zip-brain.service.d/cameras.conf >/dev/null <<UNIT
 [Service]
