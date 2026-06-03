@@ -134,6 +134,25 @@ export interface ScanMsg {
   ts: number;
 }
 
+export interface PoseMsg {
+  type: "pose";
+  /** World metres, frame anchored at brain start. */
+  x: number;
+  y: number;
+  /** Heading in radians. */
+  theta: number;
+  ts: number;
+}
+
+export interface OccupancyMsg {
+  type: "occupancy";
+  cell_m: number;
+  /** Occupied cells as integer [cx, cy] grid coords. */
+  occupied: [number, number][];
+  free_bounds: [number, number, number, number];
+  ts: number;
+}
+
 export type ServerMessage =
   | HelloMsg
   | TelemetryMsg
@@ -145,7 +164,9 @@ export type ServerMessage =
   | DetectionsMsg
   | SnapshotMsg
   | ImuMsg
-  | ScanMsg;
+  | ScanMsg
+  | PoseMsg
+  | OccupancyMsg;
 
 /* -------------------------------------------------------------------------- */
 /* HUD-side derived state                                                     */

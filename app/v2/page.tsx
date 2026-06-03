@@ -22,10 +22,11 @@ import { RadarPanel } from "@/components/v2/RadarPanel";
 import { SnapshotGallery } from "@/components/v2/SnapshotGallery";
 import { TelemetryPanel } from "@/components/v2/TelemetryPanel";
 import { ViewportFrame } from "@/components/v2/ViewportFrame";
-import { WorldView3D } from "@/components/v2/WorldView3D";
 
 import { brainHttpBase, camStreamUrl } from "@/lib/v2/brainUrl";
+import { MapView } from "@/components/v2/MapView";
 import { useDetections } from "@/lib/v2/useDetections";
+import { useMap } from "@/lib/v2/useMap";
 import { useSensors } from "@/lib/v2/useSensors";
 import { useCameraSources } from "@/lib/v2/useCameraSources";
 import { useDriveInput } from "@/lib/v2/useDriveInput";
@@ -92,6 +93,7 @@ export default function V2Page() {
 
   // ----- Phase 5 sensors: IMU heading + servo-swept radar -----
   const sensors = useSensors(bus.register);
+  const mapState = useMap(bus.register);
   const [scanning, setScanning] = useState(false);
   const toggleScan = useCallback(
     (on: boolean) => {
@@ -191,17 +193,21 @@ export default function V2Page() {
           {/* The 3D viewport is the HERO — fills all remaining vertical space. */}
           <div className="flex-1 min-h-0 relative zip-bezel overflow-hidden">
             <ViewportFrame
-              callsign="VIEW // WORLD"
+              callsign="VIEW // MAP"
               topRight={
                 <>
-                  <span>3D / SIM</span>
-                  <span className="zip-num text-[var(--v2-text)]">{Math.round(fps)} fps</span>
+                  <span>OCCUPANCY · 5CM</span>
+                  <span className="zip-num text-[var(--v2-text)]">{mapState.occupied.length} cells</span>
                 </>
               }
               bottomLeft={
                 <>
-                  <span>ENV · VOID</span>
-                  <span className="zip-num text-[var(--v2-text)]">x 0.00 y 0.00 yaw 0.00</span>
+                  <span>POSE · DEAD-RECKON</span>
+                  <span className="zip-num text-[var(--v2-text)]">
+                    {mapState.pose
+                      ? `x ${mapState.pose.x.toFixed(2)} y ${mapState.pose.y.toFixed(2)} yaw ${((mapState.pose.theta * 180) / Math.PI).toFixed(0)}°`
+                      : "x — y — yaw —"}
+                  </span>
                 </>
               }
               bottomRight={
@@ -213,7 +219,7 @@ export default function V2Page() {
                 </>
               }
             >
-              <WorldView3D axes={axes} ultrasonicCm={state.ultrasonicCm} />
+              <MapView map={mapState} />
             </ViewportFrame>
           </div>
           {/* Compact camera strip BELOW the hero — fixed height regardless of column width.
