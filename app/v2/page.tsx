@@ -41,9 +41,24 @@ export default function V2Page() {
 
   // ----- drive input + send loop -----
   const sendStopRef = useRef<() => void>(() => {});
+  // useDriveInput dispatches axes changes synchronously inside the keydown
+  // event handler. We forward that into the WS as the fastest possible path
+  // (one DOM-task hop, no rAF or React-render wait).
   const driveInput = useDriveInput({
     onStop: () => {
       sendStopRef.current();
+    },
+    onAxesChange: (a) => {
+      if (a.v === 0 && a.w === 0) {
+        send({ type: "stop" });
+      } else {
+        send({
+          type: "drive",
+          v: Math.round(a.v * 150),
+          w: Math.round(a.w * 130),
+          ttl_ms: 250,
+        });
+      }
     },
   });
   const stopOnce = useCallback(() => {
@@ -52,10 +67,10 @@ export default function V2Page() {
   }, [send, log]);
   sendStopRef.current = stopOnce;
 
-  // Keep the latest axes accessible from the 20Hz tick without re-creating.
-  const axesRef = useRef(driveInput.axes);
-  axesRef.current = driveInput.axes;
-  useDriveTick(axesRef, send);
+  // useDriveTick is now belt-and-braces: a 30Hz re-send to keep the UNO's
+  // deadman TTL fresh while the operator holds a key. The first packet
+  // already left via the synchronous onAxesChange path above.
+  useDriveTick(driveInput.axesRef, send);
 
   // ----- side-channel WS for latency / acks -----
   // We use a small parallel WebSocket whose only job is forwarding messages
