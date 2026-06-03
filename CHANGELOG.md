@@ -4,6 +4,28 @@ ZIP V2 — every commit is in git; this file calls out only the notable
 shipped milestones. V1 history is preserved at
 [steffenpharai/Zip](https://github.com/steffenpharai/Zip).
 
+## [V2 / Phase 5.0–5.2 — Mapping & autonomous navigation] — 2026-06-02
+
+Fusion-first indoor mapping on the sensors we already have (MASt3R-SLAM
+un-locked as too heavy for an 8 GB Orin + mono cam — see PHASE5_PLAN.md).
+
+- **5.0 sensor plumbing**: UNO `N=24` exposes MPU6050 yaw; brain streams
+  `sensor.imu` (10 Hz) + an opt-in servo-swept ultrasonic radar
+  (`sensor.scan`, self-correlated by angle-encoded query tag). HUD `RadarPanel`
+  (forward-arc polar plot + heading + sweep toggle).
+- **5.1 pose + occupancy**: `mapping.py` fuses IMU heading + commanded-velocity
+  dead-reckoning → 2D pose, raycasts sweeps into a hit/miss occupancy grid
+  (`map.pose` + `map.occupancy`). HUD `MapView` becomes the viewport hero —
+  the room builds top-down as the robot senses it.
+- **5.2 trajectory planning**: `planner.py` — A* over the inflated occupancy
+  grid + pure-pursuit follower steered by IMU heading + reactive ultrasonic
+  stop. Click a goal in the HUD → `goto` → path renders → robot follows it
+  (`client.motion.drive` via the gateway). `plan.path` + `plan.status`.
+
+Verified live at the logic level (paths plan, pose dead-reckons, drive
+setpoints emit, HUD renders). Physical drive accuracy + the `max_speed_mps` /
+steering-gain calibration are pending a charged battery.
+
 ## [V2 / Phase 4 — Perception (object detection)] — 2026-06-02
 
 The robot sees. YOLO11-nano runs on the Jetson; detections overlay the BOW

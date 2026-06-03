@@ -170,6 +170,35 @@ Detections themselves are pushed over the WebSocket (`detections` /
 `snapshot` above), not polled. The HTTP routes exist for snapshot images
 and for a freshly-loaded HUD to backfill the gallery.
 
+## WebSocket: Phase 5 (sensors / mapping / planning)
+
+All over the same `/ws`. Server→client messages (replay latest unless noted):
+
+| Message | Shape | When |
+| --- | --- | --- |
+| `imu` | `{type:"imu", yaw_deg, ts}` | MPU6050 heading, ~10 Hz (uno_link `_imu_poller` → N=24). |
+| `scan` | `{type:"scan", points:[{angle,distance_cm}], ts}` | Assembled servo sweep, after each pass (opt-in). |
+| `pose` | `{type:"pose", x, y, theta, ts}` | Dead-reckoned 2D pose (m, rad), ~10 Hz. |
+| `occupancy` | `{type:"occupancy", cell_m, occupied:[[cx,cy]...], free_bounds, ts}` | Sparse occupied cells, ~1 Hz. |
+| `plan_path` | `{type:"plan_path", points:[[x,y]...], goal:[x,y]|null, ts}` | A* path (world m) on goto / replan. |
+| `plan_status` | `{type:"plan_status", state, ts}` | `idle\|planning\|following\|reached\|blocked\|no_path`. |
+
+Client→server commands:
+
+| Message | Effect |
+| --- | --- |
+| `{type:"scan", enabled}` | Toggle the servo-swept radar (off = servo centres forward). |
+| `{type:"perception", enabled?, snapshots?}` | Toggle detector / snapshot capture (GPU budget). |
+| `{type:"goto", x, y}` | Plan + drive to a world-metre goal. |
+| `{type:"goto_cancel"}` | Abort the active goto, stop. |
+
+UNO command added in Phase 5: **N=24** → `{<tag>_<yaw×10>}` (signed deci-degrees).
+
+Internal bus topics added: `sensor.imu`, `sensor.scan` / `sensor.scan_point`,
+`map.pose`, `map.occupancy`, `plan.path`, `plan.status`, and the client
+control topics `client.scan.set`, `client.goto`, `client.goto.cancel`,
+`client.perception.set`.
+
 ### `GET /health` — brain status
 
 ```json

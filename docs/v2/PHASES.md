@@ -131,6 +131,11 @@ Nothing right now. Last shipped item was Phase 4 perception.
 
 Full plan: [`PHASE5_PLAN.md`](./PHASE5_PLAN.md).
 
+**Shipped: 5.0 sensor plumbing ✅ · 5.1 pose + occupancy ✅ · 5.2 A* + click-to-go ✅**
+(verified at the logic level; physical drive tuning pends a charged battery).
+**Remaining: 5.3 visual layer (mono VIO + Depth-Anything + loop closure — the
+heavy PyTorch Jetson bring-up) · 5.4 AFT cam coverage.**
+
 - **MASt3R-SLAM un-locked** — too heavy for an 8 GB Orin Nano with a single
   mono webcam (real-time only on 3090/4090-class GPUs). Dense neural
   reconstruction moves to the offline PC path (Phase 11).
