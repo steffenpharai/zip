@@ -4,6 +4,32 @@ ZIP V2 — every commit is in git; this file calls out only the notable
 shipped milestones. V1 history is preserved at
 [steffenpharai/Zip](https://github.com/steffenpharai/Zip).
 
+## [Jarvis — standalone local AI agent on the Jetson] — 2026-06-03
+
+New track, separate from the robot: the **Jetson Orin Nano Super by itself** as a
+personal, local, agentic AI ("Jarvis"), time-shared with the robot.
+
+- **OpenClaw 2026.6.1 installed + running 100% locally** on the Jetson — a full
+  agent turn runs against a local **Qwen3-4B** model (Ollama), **zero token
+  cost**, no cloud. Web Control UI (dashboard) live on `:18789`, reachable from
+  the PC.
+- **Stack from scratch**: Node 24 (NodeSource), Ollama 0.30.4 (CUDA/JetPack
+  build), OpenClaw via npm. Onboarded non-interactively, local-only
+  (`--auth-choice ollama`), LAN-bound gateway as a systemd user service.
+- **The 8 GB fight** (documented so it's never re-derived): the desktop GUI
+  fragmented GPU memory → even the weights wouldn't load. Fix = **headless**
+  (`multi-user.target`) + Ollama tuning (`flash-attention`, `q4_0` KV cache,
+  `num_batch 256`, `max-loaded-models 1`) + a baked custom model **`zip-jarvis`**
+  (Qwen3-4B-Instruct-2507, 16384 ctx, 100% GPU, 3.3 GB).
+- **Model call**: dropped the stale Qwen2.5-3B for **Qwen3-4B-Instruct-2507**
+  (non-thinking → fast voice turns, strong tool-calling).
+- **Direction locked**: adopt OpenClaw (vs build-your-own / NVIDIA NemoClaw which
+  targets bigger boxes); local-only now, voice + on-demand cloud escalation later.
+- Docs: new [`docs/jarvis/`](docs/jarvis/README.md) tree
+  (README, RESEARCH_AND_DECISIONS, DEPLOY).
+- Known/open: first-turn latency ~54 s (large toolset on a 4B), OpenClaw
+  context-window mismatch (sees 262 k, real 16384), robot↔agent 8 GB mode manager.
+
 ## [V2 / Phase 5.3a — Monocular depth + wheel safety lock] — 2026-06-03
 
 - **5.3a depth**: Depth Anything V2 Small on the Jetson via onnxruntime-gpu

@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "openclaw-dash",
+      "runtimeExecutable": "ssh",
+      "runtimeArgs": ["-N", "-L", "18789:localhost:18789", "zip-jetson"],
+      "port": 18789
+    }
+  ]
+}

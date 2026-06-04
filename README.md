@@ -23,6 +23,7 @@ outer one so the two are deployable independently).
 | Working on wire protocols | [`docs/v2/PROTOCOLS.md`](./docs/v2/PROTOCOLS.md) |
 | Hitting weird hardware behaviour | [`docs/v2/KNOWN_ISSUES.md`](./docs/v2/KNOWN_ISSUES.md) |
 | Modifying a specific layer | [`docs/v2/DEV_WORKFLOW.md`](./docs/v2/DEV_WORKFLOW.md) |
+| Working on the standalone Jetson AI agent ("Jarvis") | [`docs/jarvis/README.md`](./docs/jarvis/README.md) |
 | Looking for V1 (deprecated) | [`docs/archive/v1/`](./docs/archive/v1/) |
 
 ## Three-tier architecture
