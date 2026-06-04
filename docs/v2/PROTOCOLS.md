@@ -182,6 +182,7 @@ All over the same `/ws`. Server→client messages (replay latest unless noted):
 | `occupancy` | `{type:"occupancy", cell_m, occupied:[[cx,cy]...], free_bounds, ts}` | Sparse occupied cells, ~1 Hz. |
 | `plan_path` | `{type:"plan_path", points:[[x,y]...], goal:[x,y]|null, ts}` | A* path (world m) on goto / replan. |
 | `plan_status` | `{type:"plan_status", state, ts}` | `idle\|planning\|following\|reached\|blocked\|no_path`. |
+| `motion_lock` | `{type:"motion_lock", locked}` | Wheel-motion safety lock state (true = motors can't be commanded). |
 
 Client→server commands:
 
@@ -191,6 +192,11 @@ Client→server commands:
 | `{type:"perception", enabled?, snapshots?}` | Toggle detector / snapshot capture (GPU budget). |
 | `{type:"goto", x, y}` | Plan + drive to a world-metre goal. |
 | `{type:"goto_cancel"}` | Abort the active goto, stop. |
+| `{type:"motion_lock", locked}` | Lock/unlock the wheels (safety; servo/scan unaffected). |
+
+HTTP added in Phase 5.3a: **`GET /depth/frame`** → a TURBO-colorized
+Depth-Anything-V2 depth JPEG of the current BOW frame (on-demand, lazy-loads
+the model). New bus topic: `motion.lock_state` / `client.motion.lock`.
 
 UNO command added in Phase 5: **N=24** → `{<tag>_<yaw×10>}` (signed deci-degrees).
 

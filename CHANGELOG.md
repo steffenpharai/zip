@@ -4,6 +4,21 @@ ZIP V2 — every commit is in git; this file calls out only the notable
 shipped milestones. V1 history is preserved at
 [steffenpharai/Zip](https://github.com/steffenpharai/Zip).
 
+## [V2 / Phase 5.3a — Monocular depth + wheel safety lock] — 2026-06-03
+
+- **5.3a depth**: Depth Anything V2 Small on the Jetson via onnxruntime-gpu
+  (CUDA, no PyTorch). On-demand `/depth/frame` endpoint → TURBO-colorized
+  depth map of the current BOW frame (~0.2 s warm). HUD `DepthPanel` with a
+  manual capture button (one inference per click, no constant GPU contention).
+  Model bring-up delegated to a headless Jetson agent. Metric scaling vs the
+  ultrasonic for object-location anchoring is Phase 6.
+- **Wheel-motion safety lock** ("desk mode"): a single choke point in the
+  motion gateway drops drive (N=200) + macro (N=210) when engaged — the wheels
+  physically can't be commanded (manual/planner/macro), while servo + scan
+  still work. `{type:"motion_lock", locked}` / `ZIP_MOTION_LOCKED`; state on
+  `motion.lock_state` → WS `motion_lock`; rose "⊘ WHEELS LOCKED" HUD badge.
+  Engaged persistently on the robot (drop-in) for desk testing.
+
 ## [V2 / Phase 5.0–5.2 — Mapping & autonomous navigation] — 2026-06-02
 
 Fusion-first indoor mapping on the sensors we already have (MASt3R-SLAM

@@ -131,10 +131,21 @@ Nothing right now. Last shipped item was Phase 4 perception.
 
 Full plan: [`PHASE5_PLAN.md`](./PHASE5_PLAN.md).
 
-**Shipped: 5.0 sensor plumbing ✅ · 5.1 pose + occupancy ✅ · 5.2 A* + click-to-go ✅**
-(verified at the logic level; physical drive tuning pends a charged battery).
-**Remaining: 5.3 visual layer (mono VIO + Depth-Anything + loop closure — the
-heavy PyTorch Jetson bring-up) · 5.4 AFT cam coverage.**
+**Shipped: 5.0 sensor plumbing ✅ · 5.1 pose + occupancy ✅ · 5.2 A* + click-to-go ✅
+· 5.3a monocular depth (Depth-Anything-V2 via onnxruntime) ✅ · wheel safety lock ✅**
+(all verified at the logic level; physical drive tuning + the drive/calibration
+test pend wheels being unlocked on a charged robot).
+**Remaining: 5.3b visual VIO + loop closure (drift correction — needs driving to
+verify) · 5.4 AFT cam coverage. Then Phase 6 anchored object locations (depth is
+the enabler).**
+
+> **Hardware note (2026-06-03):** moving to physically mount the Jetson on the
+> robot. Open: Jetson power solution (needs regulated 5V/3-5A USB-C or 9-19V
+> barrel — the 2S motor pack can't cleanly do it). Jetson↔UNO link decision:
+> short USB cable (simple, deterministic, recommended) vs ESP32 WiFi→UART
+> bridge via the 4-pin (possible — `zip_esp32_bridge` firmware exists — but puts
+> WiFi in the motor loop; see that conversation). Wheels remain LOCKED until
+> told otherwise.
 
 - **MASt3R-SLAM un-locked** — too heavy for an 8 GB Orin Nano with a single
   mono webcam (real-time only on 3090/4090-class GPUs). Dense neural
