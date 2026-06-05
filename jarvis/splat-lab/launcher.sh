@@ -65,6 +65,18 @@ sudo chown -R zip:zip "${SPLAT_LAB}/scenes/${SCAN_ID}"  "${SPLAT_LAB}/output/${S
 t1=$(date +%s)
 echo "  bake took $((t1 - t0))s" | tee -a "${RUN_LOG}"
 
+# --- 2b) dashboard poster (headless gsplat render of the baked scene) -------
+echo "[step 2b] dashboard poster render ..." | tee -a "${RUN_LOG}"
+mkdir -p "${SPLAT_LAB}/.gsplat-cache"
+sudo docker run --rm --runtime nvidia --network host \
+    -v "${SPLAT_LAB}:/workspace" \
+    -v "${SPLAT_LAB}/.gsplat-cache:/root/.cache/torch_extensions" \
+    --env SPLAT_LAB=/workspace \
+    splat-lab:latest python3 /workspace/scripts/render_ply.py \
+    --scan-id "${SCAN_ID}" --views 3 --res 720 \
+    2>&1 | tee -a "${RUN_LOG}" || echo "  (poster render skipped)" | tee -a "${RUN_LOG}"
+sudo chown -R zip:zip "${SPLAT_LAB}/scenes/${SCAN_ID}" 2>/dev/null || true
+
 # --- 3) annotate ------------------------------------------------------------
 echo "[step 3/3] auto-annotations from YOLO ..." | tee -a "${RUN_LOG}"
 t0=$(date +%s)

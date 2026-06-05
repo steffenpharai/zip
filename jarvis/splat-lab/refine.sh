@@ -35,6 +35,14 @@ sudo docker run --rm --runtime nvidia --network host \
     --env SPLAT_LAB=/workspace \
     splat-lab:latest python3 /workspace/scripts/train_gsplat.py \
     --scan-id "${SCAN_ID}" --iters "${ITERS}" --max-gaussians "${MAXG}"
+
+# dashboard poster — headless gsplat render of the refined scene
+sudo docker run --rm --runtime nvidia --network host \
+    -v "${SPLAT_LAB}:/workspace" \
+    -v "${SPLAT_LAB}/.gsplat-cache:/root/.cache/torch_extensions" \
+    --env SPLAT_LAB=/workspace \
+    splat-lab:latest python3 /workspace/scripts/render_ply.py \
+    --scan-id "${SCAN_ID}" --views 3 --res 720 || true
 sudo chown -R "$(id -un):$(id -gn)" "${SPLAT_LAB}/scenes/${SCAN_ID}"
 chmod o+rx "${SPLAT_LAB}/scenes/${SCAN_ID}" 2>/dev/null || true
 chmod o+r "${SPLAT_LAB}/scenes/${SCAN_ID}"/* 2>/dev/null || true

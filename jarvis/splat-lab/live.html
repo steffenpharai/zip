@@ -168,19 +168,19 @@
 
   <!-- ROW 2 COL 2: embedded splat viewer -->
   <div class="panel">
-    <h2>3D walkthrough <span class="tag" id="viewerTag">mkkellogg · CPU sort</span></h2>
-    <iframe id="splatFrame" class="splat-frame" src="/livedemo/mk.html"
-            allow="xr-spatial-tracking; fullscreen"
-            allowfullscreen></iframe>
+    <h2>3D walkthrough <span class="tag" id="viewerTag">gsplat render</span></h2>
+    <a id="splatLink" href="/roomscan2/" target="_blank" title="open the interactive walkthrough">
+      <img id="splatPoster" class="splat-frame" src="/roomscan2/render_0.png"
+           alt="3D Gaussian-splat reconstruction" />
+    </a>
     <div class="controls">
-      <span class="key">drag</span> orbit ·
-      <span class="key">scroll</span> zoom ·
-      <span class="key">right-drag</span> pan ·
-      <a id="openFull" href="/livedemo/" target="_blank">open full ↗</a>
+      server-side gsplat render ·
+      <a id="openFull" href="/roomscan2/" target="_blank">open interactive ↗</a>
+      <span style="color:var(--dim)">(drag orbit · scroll zoom)</span>
     </div>
     <div class="iframe-fallback">
-      Renders via mkkellogg/GaussianSplats3D (back-to-front, MIT). If the
-      iframe is blank in a headless preview, open the scene in a fresh tab.
+      Poster is a headless gsplat render of the scene. Click it for the live
+      mkkellogg/GaussianSplats3D walkthrough (back-to-front, MIT) in a new tab.
       <em>SuperSplat (WebGPU) is kept at <code>/&lt;scene&gt;/supersplat.html</code>
       for trained splats only — it renders raw DA3 backprojections black.</em>
     </div>
@@ -293,7 +293,8 @@ tick();
 setInterval(tick, 500);
 
 // ── Scene picker: enumerate baked walkthroughs, click to load in the iframe ──
-let activeScene = "livedemo";
+// Default to the newest REFINED scene (sharpest), else the newest scene.
+let activeScene = null;
 function fmtAge(mtime) {
   const s = Math.max(0, Date.now()/1000 - mtime);
   if (s < 90)   return Math.round(s) + "s ago";
@@ -303,7 +304,11 @@ function fmtAge(mtime) {
 }
 function selectScene(id) {
   activeScene = id;
-  $("splatFrame").src = "/" + id + "/mk.html";
+  const poster = $("splatPoster");
+  poster.src = "/" + id + "/render_0.png?cb=" + Date.now();
+  poster.onerror = () => { poster.onerror = null;
+    poster.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect width='400' height='300' fill='%2313151a'/%3E%3Ctext x='50%25' y='50%25' fill='%238a8a90' font-family='monospace' font-size='13' text-anchor='middle'%3Eno render yet — open interactive ↗%3C/text%3E%3C/svg%3E"; };
+  $("splatLink").href = "/" + id + "/";
   $("openFull").href = "/" + id + "/";
   document.querySelectorAll(".scene").forEach(el =>
     el.classList.toggle("active", el.dataset.id === id));
@@ -314,7 +319,8 @@ async function loadScenes() {
     const box = $("scenes");
     $("scenesTag").innerText = scenes.length + " scene" + (scenes.length===1?"":"s");
     if (!scenes.length) { box.innerHTML = '<div class="scene"><div class="meta">no scans yet — capture one →</div></div>'; return; }
-    if (!scenes.some(s => s.id === activeScene)) selectScene(scenes[0].id);
+    if (!activeScene || !scenes.some(s => s.id === activeScene))
+      selectScene((scenes.find(s => s.refined) || scenes[0]).id);
     box.innerHTML = "";
     scenes.forEach(s => {
       const a = document.createElement("a");
