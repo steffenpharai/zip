@@ -1,8 +1,57 @@
 # Changelog
 
-ZIP V2 — every commit is in git; this file calls out only the notable
-shipped milestones. V1 history is preserved at
-[steffenpharai/Zip](https://github.com/steffenpharai/Zip).
+Every commit is in git; this file calls out only the notable shipped
+milestones. V1 history is preserved at the
+[`v1-archive`](https://github.com/steffenpharai/zip-v1-archive/tree/v1-archive)
+tag on `steffenpharai/zip-v1-archive`.
+
+## [Documentation professionalization pass] — 2026-06-05
+
+Bring the post-restructure repo up to "engineering AI team startup"
+quality. Private repo, but written as if ready for public view.
+
+- **Umbrella docs:** `docs/ARCHITECTURE.md` (full system picture with
+  data ownership table), `docs/ROADMAP.md` (rolled-up phase tracking
+  across robot + Jarvis vision + Jarvis LLM), `docs/HARDWARE.md`
+  (complete BOM, pinouts, network topology, power topology),
+  `docs/KNOWN_ISSUES.md` (every gotcha that bit us once),
+  `docs/GLOSSARY.md` (terminology, acronyms, phase index).
+- **Architecture Decision Records:** [`docs/adr/`](docs/adr/) with 7
+  ADRs covering monorepo shape, UNO-owns-time, UART 500k baud, sticky
+  bus topics, wheels-locked default, LLM-on-Jetson deferral, V1
+  archival.
+- **Repo meta:** `CONTRIBUTING.md` (workflow, branch model, commit
+  style, what MUST be tested), `SECURITY.md` (responsible disclosure
+  with motion-safety scope), `CODE_OF_CONDUCT.md` (Contributor Covenant).
+- **Agent-development affordances:** rewritten `AGENTS.md` with the
+  three immovable rules, what to ask vs proceed on, verification
+  commands per change type. Per-component `CLAUDE.md` files at
+  `zip-v2/hud/`, `zip-v2/firmware/`, `jarvis/splat-lab/`,
+  `jarvis/llm/`. Refreshed `.github/copilot-instructions.md`.
+- **Repo tooling:** issue templates (bug, feature, hardware) + PR
+  template with the three-rules safety check + CODEOWNERS for
+  safety-critical paths. GitHub Actions workflows: `hud-ci.yml` (typecheck
+  + build), `firmware-ci.yml` (UNO + ESP32 PlatformIO builds with
+  stubbed secrets), `docs-lint.yml` (broken-link check). Dependabot
+  updated for new HUD path.
+
+## [Repo restructure] — 2026-06-04
+
+Monorepo reorganized around three clear concerns: `jarvis/` (vision-first
+AI, primary), `zip-v2/` (the robot), `zip-v1/` (predicate snapshot).
+
+- **GitHub repo renames:** `steffenpharai/Zip` (V1) → `zip-v1-archive`
+  with `v1-archive` tag at `62869583`. `steffenpharai/zip-v2` →
+  `steffenpharai/zip` (now canonical monorepo).
+- **`jetson/` nested clone → proper git submodule at `zip-v2/brain/`**.
+- **Adopted untracked work:** `splat-lab/` and `jetson-splat-lab/` now
+  live under `jarvis/splat-lab/`. The newer k-NN-init `bake.py`
+  preserved as `bake.py.knn-init-from-pc` (the fix for the black-render
+  bug, not yet verified on Jetson).
+- **Stale ROS2-era artifacts removed:** `build/`, `install/`, `log/`,
+  `ros2_packages/`. V1→V2 cleanup reports archived under
+  `docs/archive/v2-cleanup-reports/`.
+- **Restructure commits:** `621aa38` (the move), `bf33a67` (path fixes).
 
 ## [Jarvis — standalone local AI agent on the Jetson] — 2026-06-03
 

@@ -1,0 +1,39 @@
+name: HUD CI
+
+on:
+  push:
+    paths:
+      - 'zip-v2/hud/**'
+      - '.github/workflows/hud-ci.yml'
+  pull_request:
+    paths:
+      - 'zip-v2/hud/**'
+      - '.github/workflows/hud-ci.yml'
+
+jobs:
+  typecheck-and-build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: zip-v2/hud
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: zip-v2/hud/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: '1'

@@ -1,35 +1,26 @@
-# Code Owners for ZIP Project
-# This file helps agents understand code ownership and structure
+# Code owners
+#
+# Maintainers automatically requested for review on PRs touching these
+# paths. See https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
 
-# Core architecture files
-/lib/orchestrators/ @phara
-/lib/events/ @phara
-/lib/tools/registry.ts @phara
-/lib/tools/executor.ts @phara
+# Global default
+*                                       @steffenpharai
 
-# Tool implementations
-/lib/tools/implementations/ @phara
+# Safety-critical paths require explicit review
+/zip-v2/brain                           @steffenpharai
+/zip-v2/firmware/uno/src/               @steffenpharai
+/zip-v2/firmware/uno/include/config.h   @steffenpharai
+/zip-v2/firmware/esp32-cam/             @steffenpharai
 
-# API routes
-/app/api/ @phara
+# Documentation, decisions, and AI-agent affordances
+/docs/adr/                              @steffenpharai
+/AGENTS.md                              @steffenpharai
+/CONTRIBUTING.md                        @steffenpharai
+/SECURITY.md                            @steffenpharai
+/CODE_OF_CONDUCT.md                     @steffenpharai
 
-# Components
-/components/ @phara
+# Submodule pointer changes — flag for awareness
+/.gitmodules                            @steffenpharai
 
-# Hooks
-/hooks/ @phara
-
-# Configuration files
-/.cursorrules @phara
-/.github/ @phara
-/package.json @phara
-/tsconfig.json @phara
-
-# Documentation
-/docs/ @phara
-/README.md @phara
-/AGENT_GUIDE.md @phara
-
-# All other files
-* @phara
-
+# CI + repo tooling
+/.github/                               @steffenpharai

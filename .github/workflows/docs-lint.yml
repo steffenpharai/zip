@@ -1,0 +1,49 @@
+name: Docs lint
+
+on:
+  pull_request:
+    paths:
+      - '**.md'
+      - '.github/workflows/docs-lint.yml'
+
+jobs:
+  links:
+    name: Check for broken intra-repo links
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: false
+
+      - name: Scan for broken intra-repo links
+        run: |
+          set -e
+          fail=0
+          # Find all markdown link targets that look like relative paths
+          while IFS= read -r line; do
+            file="${line%%:*}"
+            rest="${line#*:}"
+            # Extract paths from markdown links of form [text](path) where path
+            # doesn't start with http or #
+            echo "$rest" | grep -oE '\]\([^)#]+' | sed 's/^\](//' | while read -r target; do
+              # Strip anchors and query strings
+              target_clean="${target%%#*}"
+              target_clean="${target_clean%%\?*}"
+              # Skip external links
+              case "$target_clean" in
+                http*|//*|mailto:*) continue ;;
+                '') continue ;;
+              esac
+              # Resolve relative to file
+              dir=$(dirname "$file")
+              resolved="$dir/$target_clean"
+              # Normalize
+              resolved=$(realpath -m "$resolved" --relative-to=.)
+              if [ ! -e "$resolved" ]; then
+                echo "::warning file=$file::broken link to $target_clean (resolved: $resolved)"
+                fail=1
+              fi
+            done
+          done < <(grep -rn '\](' --include='*.md' . 2>/dev/null || true)
+          # Warnings don't fail; uncomment next line to enforce
+          # exit $fail

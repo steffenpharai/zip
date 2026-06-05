@@ -1,0 +1,80 @@
+name: Firmware CI
+
+on:
+  push:
+    paths:
+      - 'zip-v2/firmware/uno/**'
+      - 'zip-v2/firmware/esp32-cam/**'
+      - '.github/workflows/firmware-ci.yml'
+  pull_request:
+    paths:
+      - 'zip-v2/firmware/uno/**'
+      - 'zip-v2/firmware/esp32-cam/**'
+      - '.github/workflows/firmware-ci.yml'
+
+jobs:
+  build-uno:
+    name: Build UNO firmware
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Cache PlatformIO
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pip
+            ~/.platformio/.cache
+          key: ${{ runner.os }}-pio-uno
+
+      - name: Install PlatformIO
+        run: pip install platformio
+
+      - name: Build UNO firmware
+        working-directory: zip-v2/firmware/uno
+        run: pio run -e uno
+
+      - name: Size report
+        working-directory: zip-v2/firmware/uno
+        run: pio run -e uno --target size || true
+
+  build-esp32cam:
+    name: Build ESP32-CAM firmware
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Cache PlatformIO
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pip
+            ~/.platformio/.cache
+          key: ${{ runner.os }}-pio-esp32
+
+      - name: Install PlatformIO
+        run: pip install platformio
+
+      - name: Stub secrets header (CI only)
+        working-directory: zip-v2/firmware/esp32-cam
+        run: |
+          if [ -f include/secrets.example.h ] && [ ! -f include/secrets.h ]; then
+            cp include/secrets.example.h include/secrets.h
+            sed -i 's|your-home-wifi-ssid|ci-stub|; s|your-home-wifi-password|ci-stub|' include/secrets.h
+          fi
+
+      - name: Build ESP32-CAM firmware
+        working-directory: zip-v2/firmware/esp32-cam
+        run: pio run -e esp32cam_sta

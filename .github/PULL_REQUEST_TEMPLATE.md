@@ -1,96 +1,66 @@
-# Pull Request
+# PR description
 
-## Description
+## What changed
 
-<!-- Provide a clear description of what this PR does -->
+A clear one-paragraph summary. Link the issue or phase doc this is part
+of.
 
-## Type of Change
+## Why
 
-<!-- Check the relevant option -->
+What problem does this solve / what improvement does it bring? If this
+implements an ADR, link it.
 
-- [ ] Bug fix (non-breaking change which fixes an issue)
-- [ ] New feature (non-breaking change which adds functionality)
-- [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
-- [ ] Documentation update
-- [ ] Code refactoring
-- [ ] Performance improvement
-- [ ] Test addition or update
+## Component impact
 
-## Related Issues
+- [ ] HUD (`zip-v2/hud/`)
+- [ ] Brain (`zip-v2/brain/` — submodule SHA bumped to `__________`)
+- [ ] UNO firmware (`zip-v2/firmware/uno/`)
+- [ ] ESP32 firmware (`zip-v2/firmware/esp32-cam/`)
+- [ ] Wire protocol — **requires ADR**, link: ____________
+- [ ] Jarvis labs
+- [ ] Documentation only
+- [ ] Repo tooling (.github, scripts, gitignore)
 
-<!-- Link to related issues using #issue-number -->
-Closes #
-Related to #
+## Verification
 
-## Changes Made
+What did you test? Be specific.
 
-<!-- List the main changes in this PR -->
+- [ ] **HUD changes:** `npm run typecheck` and `npm run build` pass;
+      manual browser test against live/mocked brain
+- [ ] **Brain changes:** systemd restart + 60 s clean journal log
+- [ ] **UNO firmware:** size report attached; bench test with `pio
+      device monitor -b 500000`; N=120 diagnostics show expected state
+- [ ] **ESP32 firmware:** `/health` shows expected SSID + uptime;
+      MJPEG `:81/stream` renders at expected FPS
+- [ ] **Motion-related:** drive-tested on propped-up chassis (wheels
+      off ground); confirmed `motion_lock` badge updates correctly;
+      STOP path works
+- [ ] **Documentation only:** broken-link check, spelling
 
-- 
-- 
-- 
+## The three immovable rules check
 
-## Testing
+Did this PR touch (or come anywhere near) any of these?
 
-<!-- Describe the tests you ran and their results -->
+- [ ] **UNO owns time** ([ADR 0002](../docs/adr/0002-uno-owns-time.md)) —
+      does this add motion logic outside the UNO?
+- [ ] **UART 500000 baud** ([ADR 0003](../docs/adr/0003-uart-500k-baud.md)) —
+      any serial config touched?
+- [ ] **Wheels locked default** ([ADR 0005](../docs/adr/0005-wheels-locked-default.md)) —
+      any change to `ZIP_MOTION_LOCKED` default or motion gateway lock check?
 
-- [ ] All existing tests pass (`npm run test:e2e`)
-- [ ] Type checking passes (`npm run typecheck`)
-- [ ] Linting passes (`npm run lint`)
-- [ ] New tests added for new functionality
-- [ ] Manual testing completed
+If yes to any → call out in the description; reviewer must explicitly
+sign off.
 
-### Test Results
+## Screenshots / evidence
 
-```
-<!-- Paste test output here if relevant -->
-```
+Required for HUD changes; encouraged for everything else.
 
-## Code Quality Checklist
+## Follow-ups
 
-<!-- Verify these before submitting -->
+What's NOT in this PR that should be? Open follow-up issues and link
+them.
 
-- [ ] Code follows the project's style guidelines (see `.cursorrules`)
-- [ ] TypeScript strict mode compliance (no `any` types without justification)
-- [ ] All inputs validated with Zod schemas (if applicable)
-- [ ] Event bus used correctly for state changes (if applicable)
-- [ ] Tool registered in `lib/tools/registry.ts` (if new tool)
-- [ ] Permission tier correctly assigned (if new tool)
-- [ ] Error handling implemented
-- [ ] Observability/tracing added (if applicable)
-- [ ] Rate limiting considered (if applicable)
-- [ ] Security considerations addressed
+---
 
-## Architecture Compliance
-
-<!-- Verify these for architectural changes -->
-
-- [ ] Follows event-driven architecture pattern
-- [ ] Uses tool registry pattern (if applicable)
-- [ ] Integrates with AI Brain orchestration (if applicable)
-- [ ] Respects permission tiers (READ/WRITE/ACT/ADMIN)
-- [ ] Audit logging in place (if applicable)
-
-## Documentation
-
-- [ ] README.md updated (if needed)
-- [ ] Code comments added for complex logic
-- [ ] API documentation updated (if applicable)
-- [ ] Agent documentation updated (if applicable)
-
-## Screenshots / Demo
-
-<!-- If applicable, add screenshots or a demo -->
-
-## Additional Notes
-
-<!-- Any additional information reviewers should know -->
-
-## Agent Notes
-
-<!-- If this PR was created by an AI agent, note any specific considerations -->
-
-- Agent used: [GitHub Copilot / Cursor Agent / Both]
-- Instructions followed: [Link to relevant docs]
-- Special considerations:
-
+🤖 If this PR was generated or assisted by an AI agent, mention which
+one in the body (e.g., "Generated with Claude Opus 4.7 (1M context)").

@@ -1,28 +1,28 @@
 version: 2
 updates:
-  # Enable version updates for npm
+  # HUD (Next.js + npm) — at zip-v2/hud/ after the 2026-06-04 restructure
   - package-ecosystem: "npm"
-    directory: "/"
+    directory: "/zip-v2/hud"
     schedule:
       interval: "weekly"
       day: "monday"
       time: "09:00"
     open-pull-requests-limit: 5
     reviewers:
-      - "phara"
+      - "steffenpharai"
     labels:
       - "dependencies"
       - "automated"
+      - "hud"
     commit-message:
       prefix: "chore"
       include: "scope"
-    # Group updates to reduce PR noise
     groups:
       production-dependencies:
         dependency-type: "production"
       development-dependencies:
         dependency-type: "development"
-    # Ignore major version updates for critical packages (review manually)
+    # Critical packages get manual major review
     ignore:
       - dependency-name: "next"
         update-types: ["version-update:semver-major"]
@@ -37,3 +37,15 @@ updates:
       - dependency-name: "better-sqlite3"
         update-types: ["version-update:semver-major"]
 
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "ci"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
