@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git branch*)",
+      "Bash(git remote -v)",
+      "Bash(git fetch*)",
+      "Bash(git rev-parse*)",
+      "Bash(git ls-files*)",
+      "Bash(git check-ignore*)",
+      "Bash(git submodule status*)",
+      "Bash(npm install*)",
+      "Bash(npm ci)",
+      "Bash(npm run typecheck)",
+      "Bash(npm run build)",
+      "Bash(npm run test:e2e)",
+      "Bash(npm run lint)",
+      "Bash(npm run dev*)",
+      "Bash(npx tsc*)",
+      "Bash(pio run -e uno)",
+      "Bash(pio run -e esp32cam_sta)",
+      "Bash(pio check*)",
+      "Bash(ssh zip-jetson*)",
+      "Bash(ssh zip-jetson-wifi*)",
+      "Bash(scp * zip-jetson:*)",
+      "Bash(scp zip-jetson:* *)",
+      "Bash(gh api repos/steffenpharai/zip*)",
+      "Bash(gh api repos/steffenpharai/zip-brain*)",
+      "Bash(gh api repos/steffenpharai/zip-v1-archive*)",
+      "Bash(gh pr view*)",
+      "Bash(gh pr list*)",
+      "Bash(gh pr checks*)",
+      "Bash(gh issue view*)",
+      "Bash(gh issue list*)",
+      "Bash(gh run list*)",
+      "Bash(gh run view*)"
+    ],
+    "deny": [
+      "Bash(git push --force*)",
+      "Bash(git push -f*)",
+      "Bash(git reset --hard*)",
+      "Bash(git clean -f*)",
+      "Bash(git checkout master*)",
+      "Bash(rm -rf /*)",
+      "Bash(rm -rf ~/*)",
+      "Bash(sudo rm -rf*)",
+      "Bash(ssh zip-jetson*sudo systemctl edit zip-brain*ZIP_MOTION_LOCKED=0*)",
+      "Bash(* ZIP_MOTION_LOCKED=0 *)"
+    ]
+  },
+  "env": {
+    "ZIP_DEFAULT_BRAIN_HOST": "192.168.55.1",
+    "ZIP_DEFAULT_BRAIN_PORT": "8080",
+    "NEXT_TELEMETRY_DISABLED": "1"
+  }
+}

@@ -5,6 +5,37 @@ milestones. V1 history is preserved at the
 [`v1-archive`](https://github.com/steffenpharai/zip-v1-archive/tree/v1-archive)
 tag on `steffenpharai/zip-v1-archive`.
 
+## [Autonomous-dev configuration + investor-grade docs] — 2026-06-05
+
+Set the repo up for end-to-end autonomous AI development and a real
+investor pitch.
+
+- **Autonomous-dev config (`.claude/`):** 4 project-specific subagents
+  (`robot-tester`, `firmware-builder`, `splat-debugger`,
+  `brain-deployer`), 6 slash commands (`/jetson-status`,
+  `/deploy-brain`, `/verify-splat`, `/firmware-build`,
+  `/verify-changes`, `/autonomous-dev`), 2 skills (`autonomous-dev`,
+  `drive-safety`), `settings.json` with 33-entry allowlist and
+  destructive-op deny list (including the `ZIP_MOTION_LOCKED=0`
+  pattern), comprehensive `.claude/README.md` indexing all of it.
+- **Investor-pitch quality docs:** `PITCH.md` (problem / solution /
+  why-now / why-us / traction / vision / ask),
+  `docs/VISION.md` (5-year thesis with year-by-year roadmap),
+  `docs/TRACTION.md` (every measured capability + perf number),
+  `docs/TEAM.md` (solo founder + AI-agent development model).
+- **README upgrade:** mermaid system architecture diagram, mermaid
+  Jarvis vision-pipeline diagram, mermaid phase-progression timeline.
+  Measured perf table, command catalog, doc-map by audience
+  (investor / engineer / operator / AI-agent / hardware).
+- **GitHub repo metadata:** descriptions + topics refreshed on
+  `steffenpharai/zip` (12 topics: robotics, jetson, arduino, nextjs,
+  computer-vision, gaussian-splatting, autonomous-robot, edge-ai,
+  yolo, depth-anything, ai-agents, claude-code) and
+  `steffenpharai/zip-brain`. `steffenpharai/zip-v1-archive` formally
+  marked `archived=true`.
+- **`docs/images/`** placeholder + convention doc for future
+  screenshots / photos / branding.
+
 ## [Documentation professionalization pass] — 2026-06-05
 
 Bring the post-restructure repo up to "engineering AI team startup"
