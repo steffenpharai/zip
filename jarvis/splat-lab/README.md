@@ -69,9 +69,12 @@ Gitignored (lives on the Jetson):
 To re-fetch on a fresh Jetson, see [MISSION.md](./MISSION.md) for the
 day-by-day setup recipe.
 
-## Mirror files
+## Docs
 
-- `README.md.pc-mirror` — the original PC-side mirror README (pre-restructure)
-- `REPORT.md.pc-mirror` — the session-handoff REPORT with measured numbers,
-  root-cause analysis of the black render, and the k-NN-init plan
+- **`REPORT.md`** — current canonical report: the resolved black-render
+  root cause, the full live pipeline, measured numbers, frontier-research
+  verdict, and the capture-parallax limiter. **Read this first.**
 - `MISSION.md` — the original agent brief (frontier-lab quality bar)
+- `CLAUDE.md` — working guidance for agents in this lab
+- `REPORT.md.pc-mirror` / `README.md.pc-mirror` — historical pre-resolution
+  mirror files (kept for provenance)

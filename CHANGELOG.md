@@ -5,6 +5,43 @@ milestones. V1 history is preserved at the
 [`v1-archive`](https://github.com/steffenpharai/zip-v1-archive/tree/v1-archive)
 tag on `steffenpharai/zip-v1-archive`.
 
+## [Splat black-render resolved + gsplat refine + dashboard integration] — 2026-06-05
+
+The Jarvis `splat-lab` 3D-Gaussian-Splat pipeline went from "renders black in
+the browser" to a live, viewable walkthrough integrated into the dashboard.
+All Apache-2.0 / MIT.
+
+- **Root cause (proven on the live Jetson):** the black render was the
+  **viewer**, not the data. The same `scene.compressed.ply` renders black in
+  PlayCanvas SuperSplat (WebGPU front-to-back tile compositor) but renders the
+  room in **mkkellogg/GaussianSplats3D** (Three.js, back-to-front). Second
+  trap: under nginx COOP/COEP isolation mkkellogg's SharedArrayBuffer/GPU-sort
+  path also goes black — `gpuAcceleratedSort:false` (CPU radix sort) is the
+  actual fix. The earlier k-NN-init and transmittance-underflow theories were
+  wrong (the bisect artifact had a PLY-header bug).
+- **Viewer swap (`bake.py`, `scripts/mk_viewer.html`):** `bake.py` now deploys
+  the mkkellogg viewer as `index.html`/`mk.html` by default; SuperSplat kept as
+  `supersplat.html` for trained splats. Opacity defaults 0.45–0.90, scale_mult
+  2.2. Viewer libs vendored once at `scenes/_lib/`.
+- **Stage B refine (`scripts/train_gsplat.py`, `refine.sh`):** rewrote the
+  non-functional stub into a real gsplat 1.5.3 photometric refiner (Apache-2.0,
+  frame-correct w2c/Y-Z handling). Validated on roomscan2: **PSNR 16.94 → 34.35
+  dB, 98 MB peak VRAM**. Persistent CUDA-JIT cache.
+- **Headless render (`scripts/render_ply.py`):** browser-independent gsplat
+  render of any PLY to PNG — objective quality check + dashboard poster.
+- **Dashboard integration (`live.html`, `live_stream.py`):** new `/live/scenes`
+  endpoint; dynamic scene picker with ✦refined badge; 3D-walkthrough panel
+  shows the gsplat render poster (click → live viewer); capture how-to with the
+  slow-walk-for-parallax tip; corrected labels/footer. Defaults to the newest
+  refined scene.
+- **Frontier vetting:** AnySplat ruled out (MIT code but CC-BY-NC VGGT-1B
+  weights + ~886M params, won't fit Orin 8 GB); InstantSplat ruled out (MASt3R
+  NC). gsplat 1.5.3 is the clean Apache path. DA3-Small has no GS head (that's
+  DA3-Large/Giant, CC-BY-NC).
+- **Known limiter (capture-side, not code):** both test captures had <6 mm
+  camera baseline → DA3 ~monocular → thin 2.5D slab. A 1–2 m slow-walk capture
+  is required for true 3D structure. Documented in `jarvis/splat-lab/REPORT.md`.
+
 ## [Autonomous-dev configuration + investor-grade docs] — 2026-06-05
 
 Set the repo up for end-to-end autonomous AI development and a real
