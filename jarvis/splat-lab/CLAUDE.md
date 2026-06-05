@@ -4,24 +4,34 @@ You're working on the 3D Gaussian Splat reconstruction pipeline at
 `jarvis/splat-lab/`. For repo rules see [`/AGENTS.md`](../../AGENTS.md);
 for vision-lab framing see [`../README.md`](../README.md).
 
-## State of the world (the active bug)
+## State of the world — black render RESOLVED 2026-06-05
 
-**The DA3 → PLY pipeline produces a structurally-valid PLY that renders
-BLACK in the SuperSplat WebGPU viewer.** This is currently the open
-issue in Jarvis. The k-NN-init fix sits at
-[`scripts/bake.py.knn-init-from-pc`](./scripts/bake.py.knn-init-from-pc)
-and has not been verified.
+**The black render was the VIEWER, not the data.** The DA3→PLY is fine; it
+renders pure black in PlayCanvas SuperSplat (WebGPU front-to-back compositor)
+but renders as a real room in **mkkellogg/GaussianSplats3D** (back-to-front,
+CPU sort). Verified on the live Jetson by loading one PLY in both viewers.
 
-**The current concrete goal** (per the user) is:
+`bake.py` now deploys the mkkellogg viewer (`scripts/mk_viewer.html`) as the
+default **index.html + mk.html**; SuperSplat is kept as `supersplat.html` for
+future TRAINED splats. Critical viewer setting under nginx COOP/COEP:
+`gpuAcceleratedSort:false` + `sharedMemoryForWorkers:false` (the SAB/GPU sort
+path renders black under cross-origin isolation). Viewer libs vendored once at
+`scenes/_lib/`.
 
-1. scp `bake.py.knn-init-from-pc` to the Jetson as `~/splat-lab/scripts/bake.py`
-2. Run `./launcher.sh livedemo` on the Jetson
-3. Open `http://localhost:8090/livedemo/` in Chromium (via the
-   `jetson-splat` SSH tunnel)
-4. Confirm the splat actually renders (not black, not just outline,
-   actually shapes + colors)
+To rebuild a scene end-to-end:
+```bash
+ssh zip-jetson "cd ~/splat-lab && ./launcher.sh <scan_id> 90 8"
+# open http://localhost:8090/<scan_id>/ via the jetson-splat SSH tunnel
+```
 
-Detailed root-cause analysis and fix plan: [`REPORT.md.pc-mirror`](./REPORT.md.pc-mirror).
+**Remaining work is quality, not correctness:** the livedemo capture had no
+parallax (DA3 poses ~identity), so it's a thin depth-slab. Slow-walk the C615
+1–2 m for a real reconstruction; then optionally gsplat 1.5.3 refine
+(Apache-2.0, already in the container) for trained-splat quality.
+
+Full resolution detail: the `reference-splat-viewer-choice` memory.
+Note: the k-NN-init was kept but was NOT the fix; `bake.py.knn-init-from-pc`
+has been promoted into `bake.py`.
 
 ## Where things live
 

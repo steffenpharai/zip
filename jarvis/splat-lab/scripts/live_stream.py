@@ -30,6 +30,8 @@ from aiohttp import web
 
 PERCEPTION = Path.home() / "perception-lab"
 DEPTH_LAB = Path.home() / "depth-lab"
+SPLAT_LAB = Path(os.environ.get("SPLAT_LAB", str(Path.home() / "splat-lab")))
+SCENES_DIR = SPLAT_LAB / "scenes"
 sys.path.insert(0, str(PERCEPTION))
 sys.path.insert(0, str(DEPTH_LAB))
 from detect import Detector                     # noqa: E402
@@ -310,6 +312,42 @@ def parse_tegra(line: str) -> dict:
     return out
 
 
+async def scenes(req):
+    """Enumerate baked walkthrough scenes for the dashboard scene picker.
+
+    A scene is any scenes/<id>/ dir (excluding the shared _lib) that has a
+    scene.compressed.ply. Reads scene-meta.json for point count + camera and
+    flags whether a gsplat-refined splat is present.
+    """
+    out = []
+    if SCENES_DIR.is_dir():
+        for d in sorted(SCENES_DIR.iterdir()):
+            if not d.is_dir() or d.name == "_lib":
+                continue
+            ply = d / "scene.compressed.ply"
+            if not ply.exists():
+                continue
+            meta = {}
+            mp = d / "scene-meta.json"
+            if mp.exists():
+                try:
+                    meta = json.loads(mp.read_text())
+                except Exception:
+                    meta = {}
+            out.append({
+                "id": d.name,
+                "n_points": meta.get("n_points"),
+                "refined": (d / "refined.ply").exists()
+                           or bool(meta.get("refined")),
+                "ply_mb": round(ply.stat().st_size / 1e6, 1),
+                "mtime": int(ply.stat().st_mtime),
+                "has_hotspots": (d / "hotspots.json").exists(),
+            })
+    out.sort(key=lambda s: s["mtime"], reverse=True)
+    return web.json_response(
+        {"scenes": out}, headers={"Access-Control-Allow-Origin": "*"})
+
+
 async def health(req):
     s: State = req.app["state"]
     tegra = parse_tegra(s.tegrastats)
@@ -366,6 +404,7 @@ def main():
         web.get("/depth", depth),
         web.get("/detections", detections),
         web.get("/health", health),
+        web.get("/scenes", scenes),
     ])
     app.on_startup.append(on_startup)
     app.on_cleanup.append(on_cleanup)

@@ -20,6 +20,13 @@
       ],
       "port": 8090,
       "openPath": "/"
+    },
+    {
+      "name": "ply-probe",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "8099", "--directory", "C:/Zip/jarvis/splat-lab"],
+      "port": 8099,
+      "openPath": "/probe-viewer.html"
     }
   ]
 }

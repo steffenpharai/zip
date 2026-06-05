@@ -1,0 +1,89 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jarvis splat — mkkellogg viewer</title>
+<style>
+  html,body{margin:0;height:100%;background:#0d0d12;color:#cdd;font:12px/1.4 ui-monospace,monospace;overflow:hidden}
+  #hud{position:fixed;top:10px;left:10px;z-index:9;background:#000a;padding:8px 10px;border-radius:6px;max-width:46ch;pointer-events:none}
+  #hud b{color:#7fd}
+  a{color:#7fd}
+</style>
+<!-- Same-origin vendored libs (COEP-safe). _lib lives one level up from the scene dir. -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "../_lib/three.module.js",
+    "@mkkellogg/gaussian-splats-3d": "../_lib/gaussian-splats-3d.module.js"
+  }
+}
+</script>
+</head>
+<body>
+<div id="hud">booting…</div>
+<script type="module">
+import * as THREE from 'three';
+import * as GS from '@mkkellogg/gaussian-splats-3d';
+
+const hud = document.getElementById('hud');
+const say = (m) => { hud.innerHTML = m; console.log('[mk]', m.replace(/<[^>]+>/g,'')); };
+
+// Generic: read this scene's own camera framing, fall back to auto-frame.
+// The bake writes a camera ~2.2 m out (sized for SuperSplat's auto-frame);
+// for the mk viewer we dolly to ~45% of that distance so the scene fills the
+// frame on first paint. User can scroll/drag from there.
+let cam = null;
+try {
+  const meta = await (await fetch('./scene-meta.json', {cache:'no-store'})).json();
+  cam = meta.camera_initial || (meta.centroid ? {position:[meta.centroid[0], meta.centroid[1]+0.3, meta.centroid[2]+2.5], target:meta.centroid} : null);
+  if (cam && cam.position && cam.target) {
+    const f = 0.45;
+    cam.position = [
+      cam.target[0] + (cam.position[0]-cam.target[0])*f,
+      cam.target[1] + (cam.position[1]-cam.target[1])*f,
+      cam.target[2] + (cam.position[2]-cam.target[2])*f,
+    ];
+  }
+} catch (e) { /* auto-frame */ }
+
+// NOTE: nginx serves these scenes with COOP/COEP cross-origin isolation
+// (required by the SuperSplat WebGPU path). Under isolation mkkellogg would
+// default to the SharedArrayBuffer + GPU-accelerated sort worker, which
+// renders BLACK for this dense low-opacity DA3 cloud. Force the CPU
+// back-to-front radix sort (the path that renders correctly).
+const opts = {
+  'sphericalHarmonicsDegree': 0,
+  'sharedMemoryForWorkers': false,
+  'gpuAcceleratedSort': false,
+};
+if (cam) {
+  opts.cameraUp = [0,1,0];
+  opts.initialCameraPosition = cam.position;
+  opts.initialCameraLookAt = cam.target;
+}
+
+say('starting viewer…');
+const viewer = new GS.Viewer(opts);
+window.__v = viewer;          // expose for debugging
+window.THREE = THREE;
+const t0 = performance.now();
+try {
+  await viewer.addSplatScene('./scene.compressed.ply', {
+    'splatAlphaRemovalThreshold': 1,
+    'showLoadingUI': true,
+    'progressiveLoad': false,
+  });
+  viewer.start();
+  const dt = ((performance.now()-t0)/1000).toFixed(1);
+  let n = '?';
+  try { n = viewer.getSplatMesh().getSplatCount(); } catch(e){}
+  say('<b>rendering</b> — scene.compressed.ply<br>' + n + ' splats · loaded in ' + dt + 's · drag to orbit, scroll to zoom<br>back-to-front compositor (mkkellogg/GaussianSplats3D, MIT)');
+  console.log('[mk] splatCount=', n);
+} catch (e) {
+  say('<b style="color:#f88">ERROR</b> ' + e.message);
+  console.error(e);
+}
+</script>
+</body>
+</html>

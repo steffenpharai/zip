@@ -29,12 +29,19 @@ from pathlib import Path
 os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
 import numpy as np
 import torch
+from sklearn.neighbors import NearestNeighbors
 
 WORKSPACE = Path(os.environ.get("SPLAT_LAB", "/workspace"))
 FRAMES_DIR = WORKSPACE / "frames"
 OUTPUT_DIR = WORKSPACE / "output"
 SCENES_DIR = WORKSPACE / "scenes"
 VIEWER_DIR = WORKSPACE / "supersplat-viewer" / "public"
+# mkkellogg/GaussianSplats3D viewer page (MIT). This is the DEFAULT viewer:
+# PlayCanvas SuperSplat's WebGPU front-to-back tile compositor renders these
+# dense low-opacity DA3 backprojections as pure black, while mkkellogg's
+# Three.js back-to-front CPU radix sort renders them correctly. Verified
+# 2026-06-05 on the Jetson. Shipped libs live once at scenes/_lib/.
+MK_VIEWER_SRC = Path(__file__).resolve().parent / "mk_viewer.html"
 
 
 def atomic_write(path: Path, data: bytes):
@@ -92,8 +99,13 @@ def write_3dgs_ply(path: Path, xyz: np.ndarray, rgb: np.ndarray,
 
 def backproject(depth: np.ndarray, K: np.ndarray, Rt: np.ndarray,
                 color: np.ndarray, conf: np.ndarray,
-                stride: int = 4, conf_pct: float = 30.0):
-    """Lift per-pixel depth into world coords. Returns (xyz, rgb, opacity, scale).
+                stride: int = 4, conf_pct: float = 30.0,
+                opacity_min: float = 0.10, opacity_max: float = 0.35):
+    """Lift per-pixel depth into world coords. Returns (xyz, rgb, opacity).
+
+    Scale is NOT computed here — it's set globally after view concat via
+    k-NN distance, so each gaussian's size reflects its real neighborhood
+    density across ALL views, not the depth-driven projection of one ray.
 
     depth: (H, W) float32 — Z in camera coords
     K:     (3, 3) float32 intrinsics for the PROCESSED-size image (not full-res!)
@@ -140,20 +152,40 @@ def backproject(depth: np.ndarray, K: np.ndarray, Rt: np.ndarray,
     rgb_f = rgb.reshape(-1, 3)
     c_f = c.reshape(-1)
 
-    # per-point scale ~ pixel size projected to world (depth-dependent).
-    # Empirical: PlayCanvas GSplat rasterizer needs at least ~20-30mm gaussians
-    # to render reliably at room scale. Pure pixel-projected size (8mm at 1m
-    # with C615 + DA3 504² + stride 2) is too small and the splat becomes
-    # invisible from any practical viewing distance. Scale to a fixed-min
-    # gaussian size proportional to scene depth.
-    pixel_world = z.reshape(-1) / fx * float(stride)   # m / pixel * stride
-    # Use the LARGER of (depth-proportional 3% of distance, geometric pixel size).
-    # This guarantees gaussians remain visible while still tightening up nearby.
-    # Per-point scale: aim for HUGE 30cm gaussians (debug: definitely visible)
-    scale = z.reshape(-1) * 0.30
+    # Opacity must STAY LOW. PlayCanvas's tile compositor multiplies
+    # transmittance per layer (T *= 1-α). With dense coplanar layers and
+    # α=0.99, transmittance underflows to 0 after 2 layers and everything
+    # behind renders black. Even DA3-high-confidence pixels are clamped
+    # well below 0.5 here so ~10 layers can stack before transmittance
+    # is negligible.
+    c_norm = (c_f - c_f.min()) / (c_f.max() - c_f.min() + 1e-6)
+    opacity = opacity_min + c_norm * (opacity_max - opacity_min)
+    return world, rgb_f, opacity
 
-    opacity = np.clip(c_f, 0.4, 0.99)
-    return world, rgb_f, opacity, scale
+
+def knn_init_scale(xyz: np.ndarray, k: int = 3, scale_mult: float = 0.6,
+                   jitter_lo: float = 0.7, jitter_hi: float = 1.3,
+                   seed: int = 42) -> np.ndarray:
+    """Per-point isotropic gaussian scale from k-NN distances.
+
+    The bake produces a 2.5D depth manifold — adjacent pixels are
+    coplanar and multi-view layers stack on top. PlayCanvas's tile
+    compositor saturates and renders that as black. Initializing scale
+    from local neighborhood density (the standard 3DGS init) gives
+    each gaussian a realistic footprint, and the multiplicative jitter
+    breaks the uniform-scale degeneracy that triggers the saturation.
+
+    Returns (N,) float32 scale in metres.
+    """
+    n = xyz.shape[0]
+    n_neighbors = k + 1     # +1 because point 0 is itself
+    nbrs = NearestNeighbors(n_neighbors=n_neighbors,
+                            algorithm="kd_tree").fit(xyz)
+    dists, _ = nbrs.kneighbors(xyz)
+    local_scale = dists[:, 1:].mean(axis=1).astype(np.float32)
+    rng = np.random.default_rng(seed)
+    jitter = rng.uniform(jitter_lo, jitter_hi, size=n).astype(np.float32)
+    return local_scale * jitter * np.float32(scale_mult)
 
 
 def run(args):
@@ -239,19 +271,19 @@ def run(args):
     # Backproject per view → accumulate
     print(f"  backprojecting with stride={args.pixel_stride} "
           f"conf_pct={args.conf_pct}...", flush=True)
-    xyz_all, rgb_all, op_all, sc_all = [], [], [], []
+    xyz_all, rgb_all, op_all = [], [], []
     for i in range(V):
-        xyz, rgb, op, sc = backproject(
+        xyz, rgb, op = backproject(
             depth[i], K_all[i], Rt_all[i], proc_imgs[i], conf[i],
-            stride=args.pixel_stride, conf_pct=args.conf_pct)
+            stride=args.pixel_stride, conf_pct=args.conf_pct,
+            opacity_min=args.opacity_min, opacity_max=args.opacity_max)
         print(f"    view {i}: {xyz.shape[0]} pts (depth [{depth[i].min():.2f},{depth[i].max():.2f}])",
               flush=True)
-        xyz_all.append(xyz); rgb_all.append(rgb); op_all.append(op); sc_all.append(sc)
+        xyz_all.append(xyz); rgb_all.append(rgb); op_all.append(op)
 
-    xyz_all = np.concatenate(xyz_all, axis=0)
+    xyz_all = np.concatenate(xyz_all, axis=0).astype(np.float32)
     rgb_all = np.concatenate(rgb_all, axis=0)
-    op_all = np.concatenate(op_all, axis=0)
-    sc_all = np.concatenate(sc_all, axis=0)
+    op_all = np.concatenate(op_all, axis=0).astype(np.float32)
 
     # Compute bounding sphere of the splat for an explicit settings.json camera.
     # SuperSplat Viewer's auto-frame is unreliable for off-origin splats; we
@@ -288,12 +320,33 @@ def run(args):
           f"  target: ({cam_tgt[0]:+.2f}, {cam_tgt[1]:+.2f}, {cam_tgt[2]:+.2f})",
           flush=True)
 
-    # Optional global cap so the browser is happy
+    # Optional global cap so the browser is happy. Done BEFORE k-NN so the
+    # neighborhood distances reflect the actual rendered density.
     if args.max_gaussians and xyz_all.shape[0] > args.max_gaussians:
         rng = np.random.default_rng(42)
         sel = rng.choice(xyz_all.shape[0], args.max_gaussians, replace=False)
-        xyz_all, rgb_all, op_all, sc_all = (
-            xyz_all[sel], rgb_all[sel], op_all[sel], sc_all[sel])
+        xyz_all, rgb_all, op_all = (
+            xyz_all[sel], rgb_all[sel], op_all[sel])
+
+    # Position jitter (m) along all three axes. Breaks exact coplanarity of
+    # the depth manifold so tile composition doesn't saturate on the first
+    # few perfectly-aligned layers. Scale is per-point so a flat wall stays
+    # flat at room scale.
+    if args.pos_jitter > 0:
+        rng = np.random.default_rng(43)
+        sigma = float(args.pos_jitter)
+        noise = rng.normal(0.0, sigma, size=xyz_all.shape).astype(np.float32)
+        xyz_all = xyz_all + noise
+        print(f"  applied position jitter sigma={sigma:.4f} m", flush=True)
+
+    # k-NN gaussian scale init — standard 3DGS recipe.
+    t_knn = time.monotonic()
+    sc_all = knn_init_scale(xyz_all, k=args.knn_k,
+                            scale_mult=args.scale_mult)
+    print(f"  k-NN scale init k={args.knn_k} mult={args.scale_mult}: "
+          f"median={np.median(sc_all)*1000:.1f} mm  "
+          f"p95={np.percentile(sc_all, 95)*1000:.1f} mm  "
+          f"({time.monotonic()-t_knn:.2f}s)", flush=True)
 
     print(f"\n  total points: {xyz_all.shape[0]}", flush=True)
 
@@ -367,11 +420,29 @@ def run(args):
         "convention": "playcanvas-y-up",
     }, indent=2))
 
-    # Deploy viewer assets into scene dir (idempotent)
-    for fname in ("index.html", "index.css", "index.js"):
-        src = VIEWER_DIR / fname
-        if src.exists():
-            shutil.copyfile(src, scene_dir / fname)
+    # Deploy the browser viewer. DEFAULT = mkkellogg/GaussianSplats3D (MIT,
+    # Three.js, back-to-front CPU radix sort) written as index.html + mk.html.
+    # The vendored libs (three.module.js + gaussian-splats-3d.module.js) live
+    # once at scenes/_lib and are referenced as ../_lib from the scene dir.
+    if MK_VIEWER_SRC.exists():
+        html = MK_VIEWER_SRC.read_text()
+        (scene_dir / "index.html").write_text(html)
+        (scene_dir / "mk.html").write_text(html)
+        lib_dir = SCENES_DIR / "_lib"
+        if not (lib_dir / "three.module.js").exists():
+            print(f"  WARN: {lib_dir}/three.module.js missing — mk viewer will "
+                  f"not load. Vendor once with: npm pack three@0.157.0 "
+                  f"@mkkellogg/gaussian-splats-3d@0.4.7", flush=True)
+    else:
+        print(f"  WARN: {MK_VIEWER_SRC} not found — no viewer deployed", flush=True)
+    # Keep the SuperSplat viewer available as supersplat.html for TRAINED
+    # (gsplat-refined) splats, which DO render in its WebGPU compositor.
+    if (VIEWER_DIR / "index.html").exists():
+        shutil.copyfile(VIEWER_DIR / "index.html", scene_dir / "supersplat.html")
+        for fname in ("index.css", "index.js"):
+            src = VIEWER_DIR / fname
+            if src.exists():
+                shutil.copyfile(src, scene_dir / fname)
 
     print(f"\nDONE  scan_id={args.scan_id}", flush=True)
     print(f"  scene dir: {scene_dir}", flush=True)
@@ -398,5 +469,19 @@ if __name__ == "__main__":
     p.add_argument("--conf-pct", type=float, default=30.0,
                    help="drop bottom N%% of pixels by confidence")
     p.add_argument("--max-gaussians", type=int, default=300_000)
+    p.add_argument("--knn-k", type=int, default=3,
+                   help="K nearest neighbors for per-point scale init")
+    p.add_argument("--scale-mult", type=float, default=2.2,
+                   help="multiplier on mean-k-NN-distance (controls overlap/fill)")
+    p.add_argument("--pos-jitter", type=float, default=0.005,
+                   help="gaussian position jitter sigma in metres (0 to disable)")
+    # Opacity tuned for the mkkellogg back-to-front compositor (the default
+    # viewer). Higher opacity = crisper, fuller surfaces. The old 0.10-0.35
+    # range was a workaround for SuperSplat's front-to-back saturation, which
+    # we no longer use as the default viewer.
+    p.add_argument("--opacity-min", type=float, default=0.45,
+                   help="floor on per-gaussian opacity")
+    p.add_argument("--opacity-max", type=float, default=0.90,
+                   help="ceiling on per-gaussian opacity")
     args = p.parse_args()
     run(args)

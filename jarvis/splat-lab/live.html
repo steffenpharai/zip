@@ -53,8 +53,22 @@
   .scene { display: block; padding: 6px 8px; background: #1d2128;
            border-radius: 3px; color: var(--fg); text-decoration: none; font-size: 11px; }
   .scene:hover { background: #252a32; }
+  .scene.active { outline: 1px solid var(--accent); }
   .scene .name { font-weight: 600; color: var(--accent); }
   .scene .meta { color: var(--dim); font-size: 10px; }
+  .scene .refined { color: var(--warn); }
+
+  .controls { margin-top: 6px; font-size: 10px; color: var(--dim); }
+  .controls .key { display: inline-block; padding: 0 5px; background: #1d2128;
+                   border-radius: 3px; color: var(--fg); }
+  .controls a { color: var(--accent); text-decoration: none; float: right; }
+
+  .howto { font-size: 11px; }
+  .howto-step { padding: 3px 0; color: var(--fg); }
+  .howto-step code { background: #0a0b0e; padding: 1px 5px; border-radius: 3px;
+                     color: var(--accent); font-size: 10px; }
+  .howto-tip { color: var(--warn); }
+  .howto-tip b { color: var(--warn); }
 
   .det { display: flex; align-items: center; gap: 6px; padding: 3px 0;
          font-size: 12px; border-bottom: 1px solid var(--line); }
@@ -154,37 +168,46 @@
 
   <!-- ROW 2 COL 2: embedded splat viewer -->
   <div class="panel">
-    <h2>Latest 3D splat <span class="tag">DA3 · livedemo</span></h2>
-    <iframe class="splat-frame" src="/livedemo/?settings=./settings.json"
+    <h2>3D walkthrough <span class="tag" id="viewerTag">mkkellogg · CPU sort</span></h2>
+    <iframe id="splatFrame" class="splat-frame" src="/livedemo/mk.html"
             allow="xr-spatial-tracking; fullscreen"
             allowfullscreen></iframe>
+    <div class="controls">
+      <span class="key">drag</span> orbit ·
+      <span class="key">scroll</span> zoom ·
+      <span class="key">right-drag</span> pan ·
+      <a id="openFull" href="/livedemo/" target="_blank">open full ↗</a>
+    </div>
     <div class="iframe-fallback">
-      iframe blocked in some headless previews. Open
-      <a href="/livedemo/" target="_blank">livedemo</a> /
-      <a href="/roomscan1/" target="_blank">roomscan1</a> in a fresh tab
-      for full WebGPU rendering.
+      Renders via mkkellogg/GaussianSplats3D (back-to-front, MIT). If the
+      iframe is blank in a headless preview, open the scene in a fresh tab.
+      <em>SuperSplat (WebGPU) is kept at <code>/&lt;scene&gt;/supersplat.html</code>
+      for trained splats only — it renders raw DA3 backprojections black.</em>
     </div>
   </div>
 
-  <!-- ROW 2 COL 3: detections + scenes -->
+  <!-- ROW 2 COL 3: detections + scenes + capture how-to -->
   <div class="panel">
     <h2>Live detections</h2>
-    <div id="dets" style="min-height: 60px;">no detections yet…</div>
+    <div id="dets" style="min-height: 48px;">no detections yet…</div>
 
-    <h2 style="margin-top:12px;">Baked walkthroughs</h2>
+    <h2 style="margin-top:12px;">Walkthroughs <span class="tag" id="scenesTag">—</span></h2>
     <div class="scenes" id="scenes">
-      <a class="scene" href="/livedemo/" target="_blank">
-        <div class="name">livedemo →</div><div class="meta">DA3 · 4 views</div>
-      </a>
-      <a class="scene" href="/roomscan1/" target="_blank">
-        <div class="name">roomscan1 →</div><div class="meta">30 s pan · 47k</div>
-      </a>
-      <a class="scene" href="/smoketest/" target="_blank">
-        <div class="name">smoketest →</div><div class="meta">desk · 24k</div>
-      </a>
-      <a class="scene" href="/sample/" target="_blank">
-        <div class="name">sample →</div><div class="meta">synthetic</div>
-      </a>
+      <div class="scene"><div class="meta">loading…</div></div>
+    </div>
+
+    <h2 style="margin-top:12px;">Capture a new scan</h2>
+    <div class="howto">
+      <div class="howto-step"><b>1.</b> SSH: <code>ssh zip-jetson</code></div>
+      <div class="howto-step"><b>2.</b> <code>cd ~/splat-lab &amp;&amp; ./launcher.sh myroom 90 8</code></div>
+      <div class="howto-step howto-tip">
+        <b>Slow-walk the camera 1–2&nbsp;m</b> during the 90&nbsp;s — DA3 needs
+        parallax. A static capture gives a flat, dim slab.
+      </div>
+      <div class="howto-step"><b>3.</b> opens at <code>/myroom/</code> when done (~40&nbsp;s)</div>
+      <div class="howto-step howto-tip">
+        Optional crisp pass: <code>refine.sh myroom</code> (gsplat 1.5.3, Apache).
+      </div>
     </div>
   </div>
 
@@ -192,7 +215,8 @@
 
 <footer>
   jetson@<span id="host"></span> · Apache 2.0 / MIT · YOLO11n TRT FP16 +
-  DAv2 Small ONNX/CUDA + DA3-SMALL bake + SuperSplat Viewer
+  DAv2 Small ONNX/CUDA + DA3-SMALL bake + gsplat 1.5.3 refine +
+  mkkellogg/GaussianSplats3D viewer
 </footer>
 
 <script>
@@ -267,6 +291,47 @@ async function tick() {
 }
 tick();
 setInterval(tick, 500);
+
+// ── Scene picker: enumerate baked walkthroughs, click to load in the iframe ──
+let activeScene = "livedemo";
+function fmtAge(mtime) {
+  const s = Math.max(0, Date.now()/1000 - mtime);
+  if (s < 90)   return Math.round(s) + "s ago";
+  if (s < 5400) return Math.round(s/60) + "m ago";
+  if (s < 1.3e5)return Math.round(s/3600) + "h ago";
+  return Math.round(s/86400) + "d ago";
+}
+function selectScene(id) {
+  activeScene = id;
+  $("splatFrame").src = "/" + id + "/mk.html";
+  $("openFull").href = "/" + id + "/";
+  document.querySelectorAll(".scene").forEach(el =>
+    el.classList.toggle("active", el.dataset.id === id));
+}
+async function loadScenes() {
+  try {
+    const { scenes } = await fetch("/live/scenes").then(r => r.json());
+    const box = $("scenes");
+    $("scenesTag").innerText = scenes.length + " scene" + (scenes.length===1?"":"s");
+    if (!scenes.length) { box.innerHTML = '<div class="scene"><div class="meta">no scans yet — capture one →</div></div>'; return; }
+    if (!scenes.some(s => s.id === activeScene)) selectScene(scenes[0].id);
+    box.innerHTML = "";
+    scenes.forEach(s => {
+      const a = document.createElement("a");
+      a.className = "scene" + (s.id === activeScene ? " active" : "");
+      a.href = "javascript:void(0)";
+      a.dataset.id = s.id;
+      const pts = s.n_points ? (s.n_points/1000).toFixed(0) + "k" : "—";
+      const refined = s.refined ? ' <span class="refined">✦refined</span>' : "";
+      a.innerHTML = `<div class="name">${s.id} →</div>` +
+                    `<div class="meta">${pts} · ${s.ply_mb}MB · ${fmtAge(s.mtime)}${refined}</div>`;
+      a.onclick = () => selectScene(s.id);
+      box.appendChild(a);
+    });
+  } catch (e) { /* daemon offline */ }
+}
+loadScenes();
+setInterval(loadScenes, 5000);
 </script>
 </body>
 </html>

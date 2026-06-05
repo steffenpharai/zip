@@ -5,35 +5,45 @@ Frontier-2026 vision pipeline: C615 webcam capture → Depth Anything 3 Small
 
 **100% Apache-2.0 / MIT.** Commercial-clean.
 
-## Status — known broken render
+## Status — RESOLVED 2026-06-05 (renders on the live Jetson)
 
-**The PLY produced by `bake.py` is structurally valid but renders BLACK in
-the SuperSplat WebGPU viewer.** Root cause analysis is in
-[REPORT.md.pc-mirror](./REPORT.md.pc-mirror) under "What's broken". TL;DR:
+**The black render was the VIEWER, not the data.** The exact same
+`scene.compressed.ply` renders pure black in PlayCanvas SuperSplat (WebGPU
+front-to-back tile compositor) but renders as a recognizable room in
+**mkkellogg/GaussianSplats3D** (Three.js, back-to-front). Proven on-device by
+loading one PLY in both viewers.
 
-> DA3-backprojected gaussians live on a sampled 2.5D depth manifold.
-> Adjacent pixels become near-coplanar gaussians. PlayCanvas's WebGPU
-> compositor multiplies transmittance per layer (T *= 1−α). With dense
-> co-planar layers at high opacity, transmittance underflows to ~0 after
-> the first few layers and everything behind renders black. The rasterizer
-> is mathematically correct — **the data is the failure mode**.
+Two things had to be true:
+1. **Use a back-to-front compositor.** SuperSplat's front-to-back path
+   saturates on dense low-opacity coplanar DA3 splats → black.
+2. **Force the CPU sort.** Under nginx's COOP/COEP cross-origin isolation,
+   mkkellogg defaults to a SharedArrayBuffer + GPU sort worker that *also*
+   renders black here. The viewer sets `gpuAcceleratedSort:false` +
+   `sharedMemoryForWorkers:false` to use the CPU radix sort that works.
 
-## The fix (not yet verified)
+`bake.py` now deploys the mkkellogg viewer as **index.html** (and `mk.html`)
+by default, keeping SuperSplat as `supersplat.html` for future *trained*
+(gsplat-refined) splats, which do render in its compositor. Opacity defaults
+were raised to 0.45–0.90 (the old 0.10–0.35 was a SuperSplat workaround).
 
-A k-NN-init refactor of `bake.py` exists at
-[`scripts/bake.py.knn-init-from-pc`](./scripts/bake.py.knn-init-from-pc) —
-459 lines, replaces the per-pixel stride-derived scale with average distance
-to K=3 nearest neighbors plus jitter (the standard 3DGS init).
-
-To verify:
-1. Copy the new bake to the Jetson as `bake.py`
-2. Re-run the launcher: `./launcher.sh <scan_id>`
-3. Open `http://localhost:8090/<scan_id>/` and confirm the splat renders
-
+Run it:
 ```bash
-scp scripts/bake.py.knn-init-from-pc zip-jetson:~/splat-lab/scripts/bake.py
-ssh zip-jetson "cd ~/splat-lab && ./launcher.sh livedemo"
+ssh zip-jetson "cd ~/splat-lab && ./launcher.sh <scan_id> 90 8"
+# then, through the jetson-splat SSH tunnel:
+#   http://localhost:8090/<scan_id>/
 ```
+
+### The real quality limiter — capture parallax
+
+`output/livedemo/poses.json` showed DA3 returned near-identity poses
+(per-view translation 0.14–6.12 mm): the camera barely moved, so DA3 fell
+back to ~monocular and produced a thin depth-slab. **For a real
+reconstruction, slow-walk the C615 1–2 m over 60–90 s.** The genuine frontier
+quality step after that is a gsplat 1.5.3 photometric refine (Apache-2.0,
+already in the container).
+
+> Note: `bake.py.knn-init-from-pc` has been promoted into `bake.py`; the k-NN
+> init was kept but it was *not* the fix — the viewer was.
 
 ## What works today
 
