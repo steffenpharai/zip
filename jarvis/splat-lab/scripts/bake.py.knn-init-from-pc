@@ -1,0 +1,459 @@
+#!/usr/bin/env python3
+"""End-to-end bake: captured frames → DA3-Small → backproject → live.ply → deploy.
+
+Architecture (Apache 2.0 / MIT clean):
+  - DA3-Small produces per-frame (depth, K, [R|t], conf) — 250 ms/frame steady on Orin
+  - Backproject every Mth pixel of every frame into world coords via inv(K) and Rt
+  - Color from source frame pixel
+  - Write as a 3DGS PLY (isotropic gaussians, opacity from conf)
+  - Atomic overwrite to scenes/<scan_id>/scene.compressed.ply
+  - Deploy viewer index.html + .css + .js next to it
+
+This is the "live channel" — a fat-point-cloud splat that's immediately viewable.
+gsplat refinement (Stage B) is a separate process that consumes the same PLY as
+init and runs longer in the background.
+
+Run inside splat-lab:latest container.
+
+Usage:
+    python bake.py --scan-id smoketest --max-views 8 --pixel-stride 4
+"""
+import argparse
+import json
+import os
+import shutil
+import sys
+import time
+from pathlib import Path
+
+os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
+import numpy as np
+import torch
+from sklearn.neighbors import NearestNeighbors
+
+WORKSPACE = Path(os.environ.get("SPLAT_LAB", "/workspace"))
+FRAMES_DIR = WORKSPACE / "frames"
+OUTPUT_DIR = WORKSPACE / "output"
+SCENES_DIR = WORKSPACE / "scenes"
+VIEWER_DIR = WORKSPACE / "supersplat-viewer" / "public"
+
+
+def atomic_write(path: Path, data: bytes):
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    tmp.write_bytes(data)
+    os.replace(tmp, path)
+
+
+def write_3dgs_ply(path: Path, xyz: np.ndarray, rgb: np.ndarray,
+                   opacity: np.ndarray, scale: np.ndarray):
+    """Binary little-endian 3DGS PLY, SH degree 0 (3 DC coeffs + opacity + scale + quat).
+
+    Inputs:
+      xyz:     (N, 3) float32 world positions
+      rgb:     (N, 3) uint8 colors (0-255)
+      opacity: (N,) float32 in [0, 1] — converted to logit
+      scale:   (N,) float32 metric size — converted to log
+    """
+    n = xyz.shape[0]
+    assert rgb.shape == xyz.shape and opacity.shape == (n,) and scale.shape == (n,)
+
+    SH_C0 = 0.28209479177387814
+    rgb_f = rgb.astype(np.float32) / 255.0
+    dc = (rgb_f - 0.5) / SH_C0
+    op_safe = np.clip(opacity, 1e-3, 1 - 1e-3)
+    op_logit = np.log(op_safe / (1.0 - op_safe))
+    log_scale = np.log(np.clip(scale, 1e-4, None))
+
+    dtype = np.dtype([
+        ("x","f4"),("y","f4"),("z","f4"),
+        ("nx","f4"),("ny","f4"),("nz","f4"),
+        ("f_dc_0","f4"),("f_dc_1","f4"),("f_dc_2","f4"),
+        ("opacity","f4"),
+        ("scale_0","f4"),("scale_1","f4"),("scale_2","f4"),
+        ("rot_0","f4"),("rot_1","f4"),("rot_2","f4"),("rot_3","f4"),
+    ])
+    buf = np.empty(n, dtype=dtype)
+    buf["x"], buf["y"], buf["z"] = xyz[:, 0], xyz[:, 1], xyz[:, 2]
+    buf["nx"] = buf["ny"] = buf["nz"] = 0.0
+    buf["f_dc_0"], buf["f_dc_1"], buf["f_dc_2"] = dc[:, 0], dc[:, 1], dc[:, 2]
+    buf["opacity"] = op_logit
+    buf["scale_0"] = buf["scale_1"] = buf["scale_2"] = log_scale
+    buf["rot_0"] = 1.0
+    buf["rot_1"] = buf["rot_2"] = buf["rot_3"] = 0.0
+
+    header = (
+        b"ply\n"
+        b"format binary_little_endian 1.0\n"
+        + f"element vertex {n}\n".encode()
+        + b"".join(f"property float {p[0]}\n".encode() for p in dtype.descr)
+        + b"end_header\n"
+    )
+    atomic_write(path, header + buf.tobytes())
+
+
+def backproject(depth: np.ndarray, K: np.ndarray, Rt: np.ndarray,
+                color: np.ndarray, conf: np.ndarray,
+                stride: int = 4, conf_pct: float = 30.0,
+                opacity_min: float = 0.10, opacity_max: float = 0.35):
+    """Lift per-pixel depth into world coords. Returns (xyz, rgb, opacity).
+
+    Scale is NOT computed here — it's set globally after view concat via
+    k-NN distance, so each gaussian's size reflects its real neighborhood
+    density across ALL views, not the depth-driven projection of one ray.
+
+    depth: (H, W) float32 — Z in camera coords
+    K:     (3, 3) float32 intrinsics for the PROCESSED-size image (not full-res!)
+    Rt:    (3, 4) float32 camera-to-world [R|t]
+    color: (H, W, 3) uint8 — SAME size as depth (the model's processed_images)
+    conf:  (H, W) float32 — confidence map
+    """
+    H, W = depth.shape
+    assert color.shape[:2] == (H, W), f"color {color.shape[:2]} != depth {(H, W)}"
+
+    # subsample
+    ys, xs = np.mgrid[0:H:stride, 0:W:stride]
+    d = depth[ys, xs]
+    rgb = color[ys, xs]
+    c = conf[ys, xs]
+
+    # confidence threshold — drop low-conf points
+    if conf_pct > 0:
+        thr = np.percentile(c, conf_pct)
+        mask = c >= thr
+        ys, xs, d, rgb, c = ys[mask], xs[mask], d[mask], rgb[mask], c[mask]
+
+    n = d.size
+    # camera coords: x_c = (u - cx) * z / fx
+    fx, fy = K[0, 0], K[1, 1]
+    cx, cy = K[0, 2], K[1, 2]
+    z = d.astype(np.float32)
+    x = (xs.astype(np.float32) - cx) * z / fx
+    y = (ys.astype(np.float32) - cy) * z / fy
+    cam = np.stack([x, y, z], axis=-1).reshape(-1, 3)
+
+    # apply camera-to-world: world = R @ cam + t  (DA3 outputs OpenCV: X right, Y down, Z forward)
+    R = Rt[:, :3]   # (3,3)
+    t = Rt[:, 3]    # (3,)
+    world = cam @ R.T + t
+
+    # OpenCV → PlayCanvas (OpenGL, right-handed, Y-up) convention.
+    # Standard transform: negate Y and Z (equivalent to 180° rotation around X).
+    # Without this the splat sits behind the viewer's default-camera look direction.
+    world = world.copy()
+    world[:, 1] *= -1.0
+    world[:, 2] *= -1.0
+
+    rgb_f = rgb.reshape(-1, 3)
+    c_f = c.reshape(-1)
+
+    # Opacity must STAY LOW. PlayCanvas's tile compositor multiplies
+    # transmittance per layer (T *= 1-α). With dense coplanar layers and
+    # α=0.99, transmittance underflows to 0 after 2 layers and everything
+    # behind renders black. Even DA3-high-confidence pixels are clamped
+    # well below 0.5 here so ~10 layers can stack before transmittance
+    # is negligible.
+    c_norm = (c_f - c_f.min()) / (c_f.max() - c_f.min() + 1e-6)
+    opacity = opacity_min + c_norm * (opacity_max - opacity_min)
+    return world, rgb_f, opacity
+
+
+def knn_init_scale(xyz: np.ndarray, k: int = 3, scale_mult: float = 0.6,
+                   jitter_lo: float = 0.7, jitter_hi: float = 1.3,
+                   seed: int = 42) -> np.ndarray:
+    """Per-point isotropic gaussian scale from k-NN distances.
+
+    The bake produces a 2.5D depth manifold — adjacent pixels are
+    coplanar and multi-view layers stack on top. PlayCanvas's tile
+    compositor saturates and renders that as black. Initializing scale
+    from local neighborhood density (the standard 3DGS init) gives
+    each gaussian a realistic footprint, and the multiplicative jitter
+    breaks the uniform-scale degeneracy that triggers the saturation.
+
+    Returns (N,) float32 scale in metres.
+    """
+    n = xyz.shape[0]
+    n_neighbors = k + 1     # +1 because point 0 is itself
+    nbrs = NearestNeighbors(n_neighbors=n_neighbors,
+                            algorithm="kd_tree").fit(xyz)
+    dists, _ = nbrs.kneighbors(xyz)
+    local_scale = dists[:, 1:].mean(axis=1).astype(np.float32)
+    rng = np.random.default_rng(seed)
+    jitter = rng.uniform(jitter_lo, jitter_hi, size=n).astype(np.float32)
+    return local_scale * jitter * np.float32(scale_mult)
+
+
+def run(args):
+    scan_dir = FRAMES_DIR / args.scan_id
+    frames = sorted(scan_dir.glob("frame_*.jpg"))
+    if not frames:
+        sys.exit(f"no frames in {scan_dir}")
+    if args.max_views and len(frames) > args.max_views:
+        # evenly subsample so coverage is preserved
+        idxs = np.linspace(0, len(frames) - 1, args.max_views).astype(int)
+        frames = [frames[i] for i in idxs]
+    print(f"DA3 over {len(frames)} frames from {scan_dir}", flush=True)
+
+    out_dir = OUTPUT_DIR / args.scan_id
+    scene_dir = SCENES_DIR / args.scan_id
+    out_dir.mkdir(parents=True, exist_ok=True)
+    scene_dir.mkdir(parents=True, exist_ok=True)
+
+    from depth_anything_3.api import DepthAnything3
+    t0 = time.monotonic()
+    model = DepthAnything3.from_pretrained("depth-anything/DA3-SMALL").cuda().eval()
+    print(f"  DA3-SMALL loaded in {time.monotonic()-t0:.1f}s", flush=True)
+    ac = torch.amp.autocast(device_type="cuda", dtype=torch.float16)
+
+    # Run multi-view inference in a single call so DA3 can pick the reference view
+    paths = [str(p) for p in frames]
+    # NVML-error retry: the dustynv/l4t-pytorch CUDA allocator sometimes hits
+    # "NVML_SUCCESS == r INTERNAL ASSERT FAILED" transients on Orin. One retry
+    # after clearing the cache fixes it ~always.
+    pred = None
+    for attempt in range(3):
+        try:
+            torch.cuda.empty_cache()
+            torch.cuda.reset_peak_memory_stats()
+            t0 = time.monotonic()
+            with ac:
+                pred = model.inference(paths, process_res=args.process_res,
+                                        infer_gs=False, export_dir=None)
+            torch.cuda.synchronize()
+            break
+        except RuntimeError as e:
+            msg = str(e)
+            if "NVML" in msg or "out of memory" in msg.lower():
+                print(f"  attempt {attempt+1} hit allocator error: {msg[:80]}",
+                      flush=True)
+                torch.cuda.empty_cache()
+                if attempt == 2:
+                    raise
+                time.sleep(1.0)
+                continue
+            raise
+    inf_s = time.monotonic() - t0
+    peak_vram = torch.cuda.max_memory_allocated() / 1e6
+    print(f"  inference: {inf_s:.2f}s   peak VRAM: {peak_vram:.0f} MB",
+          flush=True)
+
+    depth = pred.depth                    # (V, H, W)
+    K_all = pred.intrinsics               # (V, 3, 3)
+    Rt_all = pred.extrinsics              # (V, 3, 4)
+    conf = pred.conf                      # (V, H, W)
+    proc_imgs = pred.processed_images     # (V, H, W, 3) uint8 — same H,W as depth
+    V, H, W = depth.shape
+    print(f"  depth shape: ({V},{H},{W})  K: {K_all.shape}  Rt: {Rt_all.shape}",
+          flush=True)
+    print(f"  depth range global: [{depth.min():.3f}, {depth.max():.3f}]",
+          flush=True)
+
+    # Save the dense per-view artifacts
+    np.save(out_dir / "depth.npy", depth.astype(np.float32))
+    np.save(out_dir / "conf.npy", conf.astype(np.float32))
+    poses_meta = {
+        "scan_id": args.scan_id,
+        "n_views": int(V), "H": int(H), "W": int(W),
+        "process_res": args.process_res,
+        "intrinsics": K_all.tolist(),
+        "extrinsics": Rt_all.tolist(),
+        "frame_paths": [str(p) for p in frames],
+        "infer_s": inf_s,
+        "peak_vram_mb": float(peak_vram),
+    }
+    (out_dir / "poses.json").write_text(json.dumps(poses_meta, indent=2))
+
+    # Backproject per view → accumulate
+    print(f"  backprojecting with stride={args.pixel_stride} "
+          f"conf_pct={args.conf_pct}...", flush=True)
+    xyz_all, rgb_all, op_all = [], [], []
+    for i in range(V):
+        xyz, rgb, op = backproject(
+            depth[i], K_all[i], Rt_all[i], proc_imgs[i], conf[i],
+            stride=args.pixel_stride, conf_pct=args.conf_pct,
+            opacity_min=args.opacity_min, opacity_max=args.opacity_max)
+        print(f"    view {i}: {xyz.shape[0]} pts (depth [{depth[i].min():.2f},{depth[i].max():.2f}])",
+              flush=True)
+        xyz_all.append(xyz); rgb_all.append(rgb); op_all.append(op)
+
+    xyz_all = np.concatenate(xyz_all, axis=0).astype(np.float32)
+    rgb_all = np.concatenate(rgb_all, axis=0)
+    op_all = np.concatenate(op_all, axis=0).astype(np.float32)
+
+    # Compute bounding sphere of the splat for an explicit settings.json camera.
+    # SuperSplat Viewer's auto-frame is unreliable for off-origin splats; we
+    # always emit a `cameras[0].initial` so the viewer opens already framing
+    # the splat from outside its bounding sphere.
+    #
+    # IMPORTANT: use the AABB-derived bounding-sphere radius (centroid to
+    # AABB corner) — the 95th-percentile-of-point-distances trick fails when
+    # depth distribution is concentrated near the centroid but the bbox is
+    # wide, putting the camera *inside* the splat (= black render).
+    aabb_min = xyz_all.min(axis=0)
+    aabb_max = xyz_all.max(axis=0)
+    centroid = 0.5 * (aabb_min + aabb_max)
+    half_extent = 0.5 * (aabb_max - aabb_min)
+    radius = float(np.linalg.norm(half_extent))   # bounding-sphere radius
+    radius = max(radius, 0.3)
+    # camera distance: bounding-sphere radius / tan(fov/2). For fov=55° this
+    # is radius / 0.52 ≈ 1.92R. Multiply by 1.15 for a small margin so the
+    # silhouette never clips against the near-side of the bounding sphere.
+    import math
+    fov_deg = 55.0
+    cam_dist = (radius / math.tan(math.radians(fov_deg) / 2)) * 1.15
+    cam_pos = [float(centroid[0]),
+               float(centroid[1] + 0.2 * radius),
+               float(centroid[2] + cam_dist)]
+    cam_tgt = [float(x) for x in centroid]
+    print(f"  AABB:  min=({aabb_min[0]:+.2f},{aabb_min[1]:+.2f},{aabb_min[2]:+.2f})"
+          f"  max=({aabb_max[0]:+.2f},{aabb_max[1]:+.2f},{aabb_max[2]:+.2f})",
+          flush=True)
+    print(f"  centroid: ({centroid[0]:+.2f}, {centroid[1]:+.2f}, {centroid[2]:+.2f})"
+          f"  bound-sphere radius: {radius:.2f} m  cam_dist: {cam_dist:.2f} m",
+          flush=True)
+    print(f"  camera position: ({cam_pos[0]:+.2f}, {cam_pos[1]:+.2f}, {cam_pos[2]:+.2f})"
+          f"  target: ({cam_tgt[0]:+.2f}, {cam_tgt[1]:+.2f}, {cam_tgt[2]:+.2f})",
+          flush=True)
+
+    # Optional global cap so the browser is happy. Done BEFORE k-NN so the
+    # neighborhood distances reflect the actual rendered density.
+    if args.max_gaussians and xyz_all.shape[0] > args.max_gaussians:
+        rng = np.random.default_rng(42)
+        sel = rng.choice(xyz_all.shape[0], args.max_gaussians, replace=False)
+        xyz_all, rgb_all, op_all = (
+            xyz_all[sel], rgb_all[sel], op_all[sel])
+
+    # Position jitter (m) along all three axes. Breaks exact coplanarity of
+    # the depth manifold so tile composition doesn't saturate on the first
+    # few perfectly-aligned layers. Scale is per-point so a flat wall stays
+    # flat at room scale.
+    if args.pos_jitter > 0:
+        rng = np.random.default_rng(43)
+        sigma = float(args.pos_jitter)
+        noise = rng.normal(0.0, sigma, size=xyz_all.shape).astype(np.float32)
+        xyz_all = xyz_all + noise
+        print(f"  applied position jitter sigma={sigma:.4f} m", flush=True)
+
+    # k-NN gaussian scale init — standard 3DGS recipe.
+    t_knn = time.monotonic()
+    sc_all = knn_init_scale(xyz_all, k=args.knn_k,
+                            scale_mult=args.scale_mult)
+    print(f"  k-NN scale init k={args.knn_k} mult={args.scale_mult}: "
+          f"median={np.median(sc_all)*1000:.1f} mm  "
+          f"p95={np.percentile(sc_all, 95)*1000:.1f} mm  "
+          f"({time.monotonic()-t_knn:.2f}s)", flush=True)
+
+    print(f"\n  total points: {xyz_all.shape[0]}", flush=True)
+
+    # Write live.ply (Stage A), then a downsampled phone.ply, plus the viewer
+    # default-name scene.compressed.ply alias.
+    live_ply = scene_dir / "live.ply"
+    write_3dgs_ply(live_ply, xyz_all.astype(np.float32),
+                   rgb_all.astype(np.uint8), op_all.astype(np.float32),
+                   sc_all.astype(np.float32))
+
+    # phone tier
+    phone_n = min(150_000, xyz_all.shape[0])
+    if phone_n < xyz_all.shape[0]:
+        sel = np.random.default_rng(0).choice(xyz_all.shape[0], phone_n, replace=False)
+        write_3dgs_ply(scene_dir / "phone.ply",
+                       xyz_all[sel].astype(np.float32),
+                       rgb_all[sel].astype(np.uint8),
+                       op_all[sel].astype(np.float32),
+                       sc_all[sel].astype(np.float32))
+    else:
+        shutil.copyfile(live_ply, scene_dir / "phone.ply")
+
+    # hero tier (full quality)
+    shutil.copyfile(live_ply, scene_dir / "hero.ply")
+
+    # Viewer default name
+    shutil.copyfile(live_ply, scene_dir / "scene.compressed.ply")
+
+    # Emit settings.json with explicit camera framing.
+    # annotate.py preserves this and adds annotations to it.
+    settings = {
+        "version": 2,
+        "tonemapping": "neutral",
+        "highPrecisionRendering": False,
+        "background": {"color": [0.05, 0.05, 0.08]},
+        "postEffectSettings": {
+            "sharpness": {"enabled": True, "amount": 0.35},
+            "bloom":     {"enabled": False, "intensity": 1, "blurLevel": 2},
+            "grading":   {"enabled": True, "brightness": 0,
+                          "contrast": 1.05, "saturation": 1.05,
+                          "tint": [1, 1, 1]},
+            "vignette":  {"enabled": True, "intensity": 0.3,
+                          "inner": 0.4, "outer": 0.9, "curvature": 1},
+            "fringing":  {"enabled": False, "intensity": 0.5},
+        },
+        "animTracks": [],
+        "cameras": [{
+            "initial": {
+                "position": cam_pos,
+                "target": cam_tgt,
+                "fov": fov_deg,
+            }
+        }],
+        "annotations": [],          # annotate.py fills these in next stage
+        "startMode": "default",
+    }
+    settings_path = scene_dir / "settings.json"
+    tmp = settings_path.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(settings, indent=2))
+    os.replace(tmp, settings_path)
+    print(f"  wrote {settings_path}  (camera pos={cam_pos}, target={cam_tgt})",
+          flush=True)
+
+    # Also save scene meta (centroid + radius) so annotate.py and other
+    # consumers can reuse the bounds without re-reading the PLY.
+    (scene_dir / "scene-meta.json").write_text(json.dumps({
+        "centroid": cam_tgt,
+        "radius_p95_m": radius,
+        "camera_initial": {"position": cam_pos, "target": cam_tgt, "fov": 55},
+        "n_points": int(xyz_all.shape[0]),
+        "convention": "playcanvas-y-up",
+    }, indent=2))
+
+    # Deploy viewer assets into scene dir (idempotent)
+    for fname in ("index.html", "index.css", "index.js"):
+        src = VIEWER_DIR / fname
+        if src.exists():
+            shutil.copyfile(src, scene_dir / fname)
+
+    print(f"\nDONE  scan_id={args.scan_id}", flush=True)
+    print(f"  scene dir: {scene_dir}", flush=True)
+    files = sorted(scene_dir.glob("*"))
+    for f in files:
+        if f.is_file():
+            print(f"    {f.name}: {f.stat().st_size:,} bytes", flush=True)
+
+    # Concise final-line summary so the launcher can grep it
+    print(f"\nSUMMARY scan_id={args.scan_id} views={V} "
+          f"points={xyz_all.shape[0]} inference_s={inf_s:.2f} vram_mb={peak_vram:.0f}",
+          flush=True)
+
+
+if __name__ == "__main__":
+    p = argparse.ArgumentParser()
+    p.add_argument("--scan-id", required=True)
+    p.add_argument("--max-views", type=int, default=8,
+                   help="DA3 multi-view input cap (memory grows with V)")
+    p.add_argument("--process-res", type=int, default=504,
+                   help="DA3 internal processing resolution (multiple of 14)")
+    p.add_argument("--pixel-stride", type=int, default=4,
+                   help="every Nth pixel becomes a gaussian (smaller = denser)")
+    p.add_argument("--conf-pct", type=float, default=30.0,
+                   help="drop bottom N%% of pixels by confidence")
+    p.add_argument("--max-gaussians", type=int, default=300_000)
+    p.add_argument("--knn-k", type=int, default=3,
+                   help="K nearest neighbors for per-point scale init")
+    p.add_argument("--scale-mult", type=float, default=1.5,
+                   help="multiplier on mean-k-NN-distance (controls overlap)")
+    p.add_argument("--pos-jitter", type=float, default=0.005,
+                   help="gaussian position jitter sigma in metres (0 to disable)")
+    p.add_argument("--opacity-min", type=float, default=0.10,
+                   help="floor on per-gaussian opacity (low keeps compositor happy)")
+    p.add_argument("--opacity-max", type=float, default=0.35,
+                   help="ceiling on per-gaussian opacity (high = compositor saturates)")
+    args = p.parse_args()
+    run(args)

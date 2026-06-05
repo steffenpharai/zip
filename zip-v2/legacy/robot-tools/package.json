@@ -1,0 +1,14 @@
+{
+  "name": "zip-robot-motion-test",
+  "version": "1.0.0",
+  "description": "Motion test harness for ZIP Robot firmware",
+  "main": "motion_test.js",
+  "scripts": {
+    "test": "node motion_test.js"
+  },
+  "dependencies": {
+    "serialport": "^12.0.0",
+    "@serialport/parser-readline": "^12.0.0"
+  }
+}
+

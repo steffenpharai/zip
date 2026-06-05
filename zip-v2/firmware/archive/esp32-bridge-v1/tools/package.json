@@ -1,0 +1,13 @@
+{
+  "name": "zip-esp32-bridge-tools",
+  "version": "1.0.0",
+  "description": "Test tools for ZIP ESP32 Bridge",
+  "scripts": {
+    "test": "node ws_test.js",
+    "motor-test": "node ws_motor_test.js"
+  },
+  "dependencies": {
+    "ws": "^8.14.2"
+  }
+}
+

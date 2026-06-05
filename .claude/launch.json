@@ -6,6 +6,20 @@
       "runtimeExecutable": "ssh",
       "runtimeArgs": ["-N", "-L", "18789:localhost:18789", "zip-jetson"],
       "port": 18789
+    },
+    {
+      "name": "jetson-splat",
+      "runtimeExecutable": "ssh",
+      "runtimeArgs": [
+        "-N",
+        "-L", "8090:127.0.0.1:8090",
+        "-L", "8443:127.0.0.1:8443",
+        "-o", "ExitOnForwardFailure=yes",
+        "-o", "ServerAliveInterval=30",
+        "zip-jetson"
+      ],
+      "port": 8090,
+      "openPath": "/"
     }
   ]
 }

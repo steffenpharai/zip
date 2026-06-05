@@ -1,0 +1,20 @@
+# splat-lab Python deps (host venv at ~/splat-lab/.venv, --system-site-packages)
+# Inherits cv2 4.8.0 from system.
+# Heavy ML deps (torch, gsplat, DA3) live in dustynv/l4t-pytorch container,
+# NOT here. This file is only for the host-side capture / annotate / serve stack.
+
+# Capture + detection (reuse perception-lab's onnxruntime-gpu install)
+onnxruntime-gpu==1.24.0
+numpy==1.26.4
+
+# Async + WebSocket reload broadcaster
+aiohttp==3.10.10
+watchfiles==0.24.0
+
+# Annotation processing
+scikit-learn==1.5.2    # DBSCAN for hotspot clustering
+trimesh==4.5.2         # poisson recon helpers if used host-side
+open3d==0.18.0         # collision mesh extraction (heavy, only if needed host-side)
+
+# Benchmarking + logging
+psutil==6.1.0

@@ -1,0 +1,106 @@
+# splat-lab container: dustynv/l4t-pytorch + DA3 + gsplat + stubs
+#
+# Strategy: stub xformers (pure-PyTorch SwiGLU fallback works per workflow finding)
+# and pycolmap (DA3 only uses it for export utilities). All other deps from PyPI.
+#
+# Build: sudo docker build -t splat-lab:latest -f Dockerfile.splat .
+# Use:   sudo docker run --rm --runtime nvidia --network host \
+#            -v ~/splat-lab:/workspace splat-lab:latest <cmd>
+
+FROM dustynv/l4t-pytorch:r36.4.0
+
+ENV PIP_INDEX_URL=https://pypi.org/simple \
+    PIP_EXTRA_INDEX_URL=https://pypi.ngc.nvidia.com \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    HF_HOME=/workspace/models/hf-cache \
+    TORCH_HOME=/workspace/models/torch-cache \
+    PYTHONPATH=/workspace/scripts
+
+# Stub xformers — DA3 has built-in pure-PyTorch SwiGLU fallback (per workflow
+# finding); we save 4-6h of source build + FA2-won't-compile-on-sm_87 ceiling.
+RUN python3 -c "import os, sys; \
+    p=os.path.join([p for p in sys.path if 'dist-packages' in p][0], 'xformers'); \
+    os.makedirs(p, exist_ok=True); \
+    open(os.path.join(p,'__init__.py'),'w').write('__version__=\"0.0.0-stub\"\nfrom . import ops\n'); \
+    open(os.path.join(p,'ops.py'),'w').write('\\n'.join([\
+        'def memory_efficient_attention(q,k,v,**kw): raise ImportError(\"stub xformers\")',\
+        'class SwiGLU: pass',\
+        'class fmha: pass',\
+        'class LowerTriangularMask: pass',\
+    ]))"
+
+# Stub pycolmap — DA3 imports it for COLMAP-export utilities only, not inference
+RUN python3 -c "import os, sys; \
+    p=os.path.join([p for p in sys.path if 'dist-packages' in p][0], 'pycolmap'); \
+    os.makedirs(p, exist_ok=True); \
+    open(os.path.join(p,'__init__.py'),'w').write('\\n'.join([\
+        '__version__=\"0.0.0-stub\"',\
+        'class Reconstruction: pass',\
+        'class Camera: pass',\
+        'class Image: pass',\
+        'class Point3D: pass',\
+    ]))"
+
+# Drop the system distutils-blinker that blocks open3d's transitive dash dep.
+RUN apt-get update && apt-get remove -y python3-blinker || true
+
+# Snapshot the dustynv-built torch/torchvision/torchaudio (CUDA SM 8.7 ABI)
+# before any pip install can clobber the C++ extensions.
+RUN cp -r /usr/local/lib/python3.10/dist-packages/torch /tmp/torch-backup && \
+    cp -r /usr/local/lib/python3.10/dist-packages/torchvision /tmp/torchvision-backup && \
+    cp -r /usr/local/lib/python3.10/dist-packages/torchaudio /tmp/torchaudio-backup && \
+    mkdir -p /tmp/torch-distinfo && \
+    cp -r /usr/local/lib/python3.10/dist-packages/torch-*.dist-info /tmp/torch-distinfo/ && \
+    cp -r /usr/local/lib/python3.10/dist-packages/torchvision-*.dist-info /tmp/torch-distinfo/ && \
+    cp -r /usr/local/lib/python3.10/dist-packages/torchaudio-*.dist-info /tmp/torch-distinfo/ && \
+    echo "backup OK: $(ls /tmp/torch-distinfo)"
+
+# Pin the dustynv-built torch/torchvision/torchaudio — PyPI wheels would be CPU-only
+# (or wrong CUDA ABI) and replace the existing CUDA-built ones, breaking
+# `torchvision::nms` and similar CUDA ops. This constraint file is used in every
+# subsequent pip install to keep these untouched.
+RUN printf "torch==2.4.0\ntorchvision==0.19.0\ntorchaudio==2.4.0\n" \
+    > /etc/pip-constraints.txt
+
+# Install runtime deps.
+# --no-deps for depth-anything-3 (skips xformers/pycolmap — we stubbed them).
+# --no-deps for gsplat (skips CUDA-extension auto-build; we want the prebuilt
+# Python fallback path until we verify CUDA kernels actually fire).
+# Normal pip resolve for everything else.
+RUN pip install -c /etc/pip-constraints.txt --ignore-installed \
+        e3nn einops "huggingface-hub<1.18" imageio omegaconf "antlr4-python3-runtime==4.9.3" \
+        opencv-python pillow plyfile requests safetensors trimesh typer \
+        pyyaml plotly httpx fastapi uvicorn pillow-heif evo \
+        addict pydantic gradio \
+        "moviepy==1.0.3" "numpy<2" \
+        roma scikit-learn matplotlib tqdm tyro \
+    && pip install -c /etc/pip-constraints.txt open3d \
+    && pip install --no-deps depth-anything-3==0.1.1 \
+    && pip install --no-deps gsplat==1.5.3 \
+    && pip install --no-deps nerfview viser fpsample
+
+# Restore the dustynv torch/torchvision/torchaudio. PyPI installs above may
+# have clobbered the CUDA-built C++ extensions; restore the original.
+RUN rm -rf /usr/local/lib/python3.10/dist-packages/torch /usr/local/lib/python3.10/dist-packages/torchvision /usr/local/lib/python3.10/dist-packages/torchaudio && \
+    rm -rf /usr/local/lib/python3.10/dist-packages/torch-*.dist-info /usr/local/lib/python3.10/dist-packages/torchvision-*.dist-info /usr/local/lib/python3.10/dist-packages/torchaudio-*.dist-info && \
+    cp -r /tmp/torch-backup /usr/local/lib/python3.10/dist-packages/torch && \
+    cp -r /tmp/torchvision-backup /usr/local/lib/python3.10/dist-packages/torchvision && \
+    cp -r /tmp/torchaudio-backup /usr/local/lib/python3.10/dist-packages/torchaudio && \
+    cp -r /tmp/torch-distinfo/* /usr/local/lib/python3.10/dist-packages/ && \
+    python3 -c "import torch, torchvision; torchvision.ops.nms(torch.zeros(0,4), torch.zeros(0), 0.5); print('torch', torch.__version__, 'torchvision', torchvision.__version__, 'nms OK')"
+
+# Verify imports — skip open3d here (it eagerly imports plotly/dash visualizer
+# stack we don't need for inference; lazy-import inside Day-6 collision script).
+RUN python3 -c "\
+import xformers, pycolmap, depth_anything_3, gsplat, e3nn, plyfile, omegaconf; \
+from depth_anything_3 import api; \
+from depth_anything_3.services import start_server, inference_service; \
+print('xformers (stub):', xformers.__version__); \
+print('pycolmap (stub):', pycolmap.__version__); \
+print('depth_anything_3 api OK'); \
+print('gsplat:', gsplat.__version__); \
+print('e3nn:', e3nn.__version__); \
+import torch; print('torch:', torch.__version__, 'cuda:', torch.cuda.is_available())"
+
+WORKDIR /workspace

@@ -1,21 +1,39 @@
-# Zip V2 — outer (zip-v2) repo gitignore
+# Zip umbrella repo — gitignore
 
-# === Nested repos managed independently ===
-# zip-brain lives at /jetson, has its own .git
-/jetson/
-
-# === Backups (binaries; not tracked) ===
-/firmware_backup/
-
-# === Downloaded toolchain mirrors ===
-/tools/
-
-# === Firmware build artifacts ===
+# === Common build / runtime ===
 .pio/
 *.elf
 *.bin
 *.hex
 *.map
+*.pyc
+*.pyo
+__pycache__/
+.venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+node_modules/
+.pkg-cache/
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
+.env
+.env*.local
+.vercel/
+.idea/
+.cursor/
+.cursorrules
+.DS_Store
+*.pem
+*.swp
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
 # === ML model weights & TensorRT engines (hardware-built, regenerated on deploy) ===
 *.pt
@@ -24,83 +42,49 @@
 *.trt
 *.plan
 
-# === ROS 2 workspace outputs (V1 leftovers, kept on disk but not tracked) ===
-/build/
-/install/
-/log/
-/ros2_packages/*/models/
-
-# === Node / Next.js ===
-/node_modules
-/.pkg-cache
-/.next
-/out
-.env
-.env*.local
-.vercel
-*.tsbuildinfo
-next-env.d.ts
-
-# === Python ===
-__pycache__/
-*.pyc
-*.pyo
-.venv/
-.mypy_cache/
-.ruff_cache/
-.pytest_cache/
-
-# === Test outputs ===
-/coverage
-/playwright-report
-/test-results
-
-# === V1 reference dirs that should not be re-distributed ===
-robot/ELEGOO*/
-docs/VRM-registry-capture.json
-
-# === Runtime data (V1 patterns kept) ===
-data/*.db
-data/*.log
-data/traces/*.jsonl
-!data/.gitkeep
-/logs/
-
-# === Large binary assets — track outside of git if needed ===
-public/avatars/*.vrm
-*.pdb
-vrm_*.json
-vrm_*.txt
-
-# === Secrets — never tracked, anywhere ===
+# === Secrets ===
 **/secrets.h
 
-# === Editor / OS ===
-.DS_Store
-*.pem
-*.swp
-.idea/
-.cursor/
-.cursorrules
-.vscode/*
-!.vscode/settings.json
-!.vscode/extensions.json
+# ─── zip-v2 (the robot) ─────────────────────────────────────────────
+# Firmware toolchain mirror + build artifacts
+/zip-v2/firmware/tools/
+/zip-v2/firmware/*/.pio/
+/zip-v2/firmware/*/.vscode/
+/zip-v2/firmware/archive/*/.pio/
+# HUD build artifacts already covered by node_modules/.next at top
 
-# === Debug / temp ===
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+# Bridge V1 artifacts
+/zip-v2/bridge/*/dist/
+/zip-v2/bridge/*/node_modules/
+/zip-v2/bridge/*/data/
+
+# ─── jarvis (vision-first AI agent) ─────────────────────────────────
+# Vision lab model weights & caches (hardware-specific, large)
+/jarvis/depth-lab/models/
+/jarvis/perception-lab/models/
+/jarvis/perception-lab/trt_cache/
+/jarvis/splat-lab/models/
+/jarvis/splat-lab/supersplat-viewer/
+/jarvis/splat-lab/.venv/
+
+# Vision lab runtime output (regenerated on every scan)
+/jarvis/splat-lab/captures/
+/jarvis/splat-lab/frames/
+/jarvis/splat-lab/output/
+/jarvis/splat-lab/scenes/
+/jarvis/splat-lab/logs/
+/jarvis/depth-lab/run.log
+/jarvis/depth-lab/depth_vis.png
+/jarvis/depth-lab/test.jpg
+/jarvis/perception-lab/run.log
+/jarvis/perception-lab/ort_bench.log
+/jarvis/perception-lab/bus.jpg
+
+# ─── Misc / runtime ─────────────────────────────────────────────────
+/coverage/
+/playwright-report/
+/test-results/
+/artifacts/
+/logs/
 head.md
 TEST_RESULTS.md
-/artifacts
-
-# === Old subprojects not in V2 scope ===
-/services/
-
-# === Robot bridge V1 dist/node_modules (we kept the source but not artifacts) ===
-robot/bridge/*/dist/
-robot/bridge/*/node_modules/
-robot/bridge/*/data/
-
-robot/firmware/*/.pio/
-robot/firmware/*/.vscode/

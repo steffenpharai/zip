@@ -1,0 +1,307 @@
+# splat-lab — Jetson Orin Nano Super + C615 → browser walkthrough
+
+Frontier-2026 pipeline: live capture on a Logitech C615 USB webcam → Depth
+Anything 3 Small for per-frame depth+poses+camera intrinsics → backproject to
+a 3D Gaussian Splat PLY → SuperSplat Viewer (WebGPU, MIT) → browse on any
+LAN device, with a separate **live RGB+depth+YOLO dashboard** for real-time
+camera visibility.
+
+**100% Apache-2.0 / MIT licensed.** Commercial-clean.
+
+## Session status — what is and isn't working
+
+### ✅ Working end-to-end (you can use these now)
+
+1. **Live RGB + YOLO11n + DAv2 depth + tegrastats dashboard** — fully real-time:
+   ```
+   http://localhost:8090/        (via SSH tunnel — secure context)
+   http://192.168.55.1:8090/     (direct via USB-C, plain HTTP)
+   https://192.168.55.1:8443/    (direct, self-signed cert)
+   ```
+   Shows live RGB at ~7 FPS with YOLO bbox overlays, DAv2 depth at ~7 FPS,
+   live detection counts, RAM/GPU/power telemetry, 16 W total budget.
+   Service: `live_stream.py` daemon on :8092 proxied through nginx.
+
+2. **Capture pipeline** (`capture.py`) — v4l2 lockdown + C615 1280×720 MJPEG
+   + YOLO11n TRT FP16 frame-scoring → keyframes + `detections.jsonl`.
+   Measured ~16 effective FPS at 30 FPS source, ~2 retained keyframes/sec.
+
+3. **DA3-SMALL geometry pipeline** — Apache-2.0, 80 M params, loads in 1.4 s
+   (warm cache), **250 ms / frame at 504² FP16 autocast, peak 278 MB VRAM**.
+   Produces per-view (depth, conf, intrinsics K, extrinsics R|t) — fully
+   validated. xformers stubbed (SwiGLU fallback) — no source build needed.
+   `~/splat-lab/output/<scan_id>/{poses.json,depth.npy,conf.npy}`.
+
+4. **SuperSplat Viewer v1.26.2** built + deployed — WebGPU + isolation
+   working. Test scenes render correctly:
+   ```
+   http://localhost:8090/nine/       — 9 rainbow corners + white center
+   http://localhost:8090/testcube/   — same, simpler camera config
+   http://localhost:8090/sample/     — synthetic sphere (5000 splats)
+   ```
+
+5. **YOLO11n → world-space hotspots** auto-annotation pipeline
+   (`annotate.py`) — DBSCAN clustering, scaled bbox-center unprojection
+   via DA3 intrinsics, SuperSplat v2 schema, ≤25 hotspot cap. Working.
+
+6. **Infrastructure**
+   - nginx on :8090 (plain) + :8443 (TLS, self-signed)
+   - COOP/COEP/CORP triple set on ALL resources (required for WebGPU SAB)
+   - Permanent SSH tunnel `localhost:8090 → Jetson:8090` (secure context)
+   - `Dockerfile.splat` (15.5 GB image) with DA3 + gsplat + stubs
+   - 16 GB NVMe swap for OOM-resistant model loads
+   - Per-scene atomic writes + perms automation in launcher.sh
+
+### ⚠️ Working but quality-limited
+
+7. **DA3 backprojection bake** (`bake.py`) — produces a structurally-valid
+   3DGS PLY (format byte-perfect, validated, loads in PlayCanvas without
+   error), but **the splat renders BLACK in the SuperSplat Viewer**.
+   See "What's broken" below.
+
+### ❌ Known broken
+
+8. **DA3-backprojected splat rendering.** PlayCanvas WebGPU GSplat
+   rasterizer renders our DA3 PLY as **fully black** or **dark silhouette**.
+   The rest of the SuperSplat Viewer chrome (UI, annotation cycler,
+   timeline, camera controls) works.
+
+## Root-cause analysis of the black-render
+
+**The PLY is valid** — verified through the PlayCanvas parser path, byte
+distribution, finite values, normalized quaternions, sane f_dc/scale/opacity
+ranges (avg RGB linear (0.31, 0.35, 0.41), opacity sigmoid 0.99, scale
+8-72 mm depending on tuning).
+
+**The engine works** — the same scene/camera config that renders the
+DA3 PLY as black renders the test-cube PLY as a vibrant rainbow.
+
+**Decisive bisect test** — a hybrid PLY using **livedemo positions** but
+**uniform pure white 10 cm opaque gaussians** renders as a **dark silhouette
+that matches the splat's outline**. So the position cloud is being read,
+the renderer IS iterating those splats, and they are producing output —
+but the cumulative tile composition zeros out.
+
+### The real reason
+
+DA3-backprojected gaussians live on a **sampled 2.5 D depth manifold**.
+Every pixel of every input view becomes one gaussian at its depth. Adjacent
+pixels (same view, neighboring stride) lie on a near-coplanar tangent
+patch. Multiple views see roughly the same surface and stack additional
+co-planar layers behind it.
+
+PlayCanvas's WebGPU GSplat compositor sorts and front-to-back blends per
+screen tile. With many high-opacity co-planar gaussians, the cumulative
+**transmittance underflows to ~0 after the first few layers**, and the
+contribution of all subsequent (visible) gaussians becomes zero. The
+rasterizer is mathematically correct — the data is the failure mode.
+
+This is **NOT** an issue with:
+
+- PLY format ✓
+- Coordinate convention ✓ (OpenCV→PlayCanvas Y/Z flip in bake.py is right)
+- Camera position / target / FOV ✓ (test cube renders fine at same camera)
+- COOP/COEP cross-origin isolation ✓
+- WebGPU SharedArrayBuffer availability ✓
+- Canvas resize race ✓ (rAF-deferred fix landed in viewer source)
+- Tonemapping / gamma / postFX ✓ (tested with tonemap=none)
+- Gaussian scale (tested 8 mm — 30 cm — same result)
+- Gaussian count (tested 1.7 k — 105 k — same result)
+- Opacity (tested 0.15 — 0.99 — same result)
+
+### The proper fix — k-NN init (TODO next session)
+
+Real 3DGS trainers (Inria, gsplat, Brush) initialize gaussian scale per
+point as the **average distance to the K=3 nearest neighbors**, and they
+randomize per-point scale slightly to break perfect coplanarity. They also
+write `f_rest_*` SH bands ≥ 1 so view-dependent shading prevents pure
+co-planar saturation.
+
+The bake.py change needed:
+
+```python
+from sklearn.neighbors import NearestNeighbors
+nbrs = NearestNeighbors(n_neighbors=4).fit(xyz_all)
+d, _ = nbrs.kneighbors(xyz_all)
+local_scale = d[:, 1:].mean(axis=1)              # avg K=3 neighbor distance
+jitter = np.random.uniform(0.7, 1.3, size=local_scale.shape)
+scale = local_scale * jitter * 0.6                # ~3σ overlap between nbrs
+```
+
+Plus optionally write SH bands ≥ 1 (extra 9 f_rest_* properties) to give
+the rasterizer view-dependent terms that break degenerate coplanar
+composition.
+
+Alternative: drive the PLY through one short pass of **gsplat training**
+(which we already have in the splat-lab container) to refine positions
+and scales away from the depth-manifold. ~1 minute of training is enough
+to break the coplanarity in practice.
+
+## Architecture as it stands
+
+```
+                ┌──────────── ON THE JETSON ──────────────┐
+                │                                           │
+[C615 USB] ─▶  │ live_stream.py daemon :8092               │
+                │   • C615 → cv2 → YOLO11n TRT FP16         │
+                │   • DAv2 Small ONNX/CUDA → INFERNO depth  │
+                │   • tegrastats poller (RAM/GPU/W)         │
+                │   • /stream /depth /detections /health    │
+                │                                           │
+                │ capture.py (one-shot)                     │
+                │   • v4l2 lockdown + GStreamer MJPEG       │
+                │   • YOLO11n score gate                    │
+                │   • frames/ + detections.jsonl            │
+                │                                           │
+                │ bake.py (splat-lab container)             │
+                │   • DA3-SMALL (PyTorch+CUDA, FP16 autocast)│
+                │   • backproject → 3DGS PLY (Y-up flip)    │
+                │   • settings.json with cameras[0].initial │
+                │   • atomic tmpfile + rename               │
+                │                                           │
+                │ annotate.py (host venv)                   │
+                │   • YOLO bboxes → DA3 extrinsics → world  │
+                │   • pure-numpy DBSCAN (~40 LOC)           │
+                │   • SuperSplat v2 settings annotations[]  │
+                │                                           │
+                │ nginx :8090 (HTTP) + :8443 (HTTPS)        │
+                │   • COOP/COEP/CORP isolation triple       │
+                │   • /live/* proxied to :8092              │
+                │   • /<scan>/  static walkthrough          │
+                │   • self-signed cert for LAN HTTPS        │
+                └───────────────────────────────────────────┘
+                          │
+                          ▼
+[Windows Chrome] ─SSH tunnel localhost:8090─▶ Jetson
+                          │
+                          ▼  http://localhost:8090/
+                Live dashboard with everything ✓
+```
+
+## Numbers (measured this session)
+
+### Concurrent live processing on Orin Nano 8GB
+- RGB+YOLO stream: 6.7 FPS  →  YOLO11n TRT FP16 at ~34 ms inference
+- DAv2 depth stream: 6.7 FPS  →  DAv2-Small at ~143 ms inference
+- Both running together: **RAM 4.27/7.62 GB · GPU 95% · CPU 28% · 16.2 W**
+- nginx + ssh-tunnel + per-stream overhead: negligible
+
+### DA3 (run separately during bake)
+- Cold load (HF download): 17.9 s
+- Warm load: 1.4 s
+- Idle VRAM: 138 MB
+- Single 504² inference: 250 ms median, 278 MB peak
+- 4-view multi-view: 1.50 s, 531 MB peak
+- 6-view multi-view: 1.75 s, 702 MB peak
+- 8-view: OOM — do not exceed 6 with current config
+
+### End-to-end snap (`launcher.sh`)
+- 30 s capture: ~32 s wall-clock (capture + select)
+- 4-view bake: ~5 s
+- Annotate: <0.5 s
+- **Total: ~38 s from press-record to PLY on disk**
+  (Browser walkthrough quality currently blocked by the k-NN fix)
+
+## Project layout
+
+```
+~/splat-lab/
+├── MISSION.md               agent brief (frontier-lab quality bar)
+├── REPORT.md                this file
+├── Dockerfile.splat         dustynv/l4t-pytorch + DA3 + gsplat + stubs
+├── launcher.sh              one-command end-to-end
+├── supersplat-viewer/       v1.26.2 patched + built (rAF resize fix)
+├── scripts/
+│   ├── live_stream.py       aiohttp daemon — RGB + depth + JSON + tegra
+│   ├── capture.py           v4l2 + YOLO11n score-gate
+│   ├── bake.py              DA3 → backproject → live/hero/phone PLY
+│   ├── annotate.py          YOLO → world coords → settings.json hotspots
+│   ├── da3_canary.py        DA3 load + depth canary + perf
+│   ├── validate_ply.py      binary 3DGS PLY validator
+│   ├── make_huge_test_ply.py        9-corner debug cube
+│   ├── make_synthetic_ply.py        smoke-test 5000-sphere
+│   ├── make_9_at_livedemo.py        9-corner cube at livedemo bbox
+│   ├── make_hybrid_ply.py           livedemo positions + uniform white
+│   └── inspect_gs_output.py         DA3 prediction schema dump
+├── frames/<scan>/           selected keyframe JPEGs
+├── captures/<scan>/         detections.jsonl + meta.json
+├── output/<scan>/           poses.json + depth.npy + conf.npy
+├── scenes/<scan>/           live/hero/phone PLY + settings.json + viewer
+├── models/                  HF + torch hub caches
+└── logs/                    per-launcher + live_stream daemon logs
+```
+
+## How to run the live dashboard
+
+```bash
+# 1) On the Jetson (one-time, daemon, already running):
+nohup ~/perception-lab/.venv/bin/python \
+      ~/splat-lab/scripts/live_stream.py --port 8092 \
+      </dev/null >~/splat-lab/logs/live_stream.log 2>&1 & disown
+
+# 2) On Windows host, SSH tunnel for the secure-context localhost mapping:
+ssh -L 8090:127.0.0.1:8090 -L 8443:127.0.0.1:8443 -N zip-jetson
+
+# 3) Open in any Chromium (Chrome / Edge / Brave / Quest browser):
+#       http://localhost:8090/        — live dashboard
+#       http://localhost:8090/nine/   — working splat (debug cube)
+```
+
+## Next session — the k-NN-init bake.py rework
+
+```python
+# In bake.py, replace the per-pixel stride-derived scale:
+from sklearn.neighbors import NearestNeighbors
+
+nbrs = NearestNeighbors(n_neighbors=4, algorithm='kd_tree').fit(xyz_all)
+dists, _ = nbrs.kneighbors(xyz_all)
+local_scale = dists[:, 1:].mean(axis=1)
+jitter = np.random.uniform(0.7, 1.3, size=local_scale.shape)
+scale = local_scale * jitter * 0.6   # std-dev of each gaussian
+```
+
+Also consider:
+- Add per-point random depth-direction jitter (`xyz_all[:, 2] += np.random.normal(0, 0.01)`)
+  to break exact coplanarity
+- Optionally run 500 iterations of gsplat refinement in the splat-lab
+  container (already installed) — gives a Real 3DGS distribution
+- Or pivot to a viewer that doesn't have PlayCanvas's tile-compositor
+  saturation: Brush web viewer / antimatter15/splat / mkkellogg
+  GaussianSplats3D
+
+## Frontier-lab caveats this session surfaced
+
+1. **PlayCanvas WebGPU GSplat is intolerant of coplanar dense splats** —
+   not documented anywhere we found; a real engineering gotcha.
+2. **xformers stub trick** confirmed working in production with DA3-SMALL.
+3. **HTTP from a private LAN IP isn't a secure context** in Chrome — must
+   use HTTPS or localhost (SSH tunnel) for SharedArrayBuffer.
+4. **nginx `add_header` overrides** in nested location blocks silently
+   strip parent headers — explicit re-emission required in every location.
+5. **dustynv container CUDA-torch must be backed up/restored** around any
+   pip install — PyPI happily overrides with CPU-only.
+6. **ResizeObserver race in SuperSplat Viewer init** — fixed with rAF
+   defer in the viewer source; rebuild + redeploy needed.
+7. **Self-signed cert on Jetson** is set up at
+   `/etc/nginx/ssl/splat-lab.{crt,key}` (SAN includes 192.168.55.1,
+   192.168.86.47, 127.0.0.1, zip, zip.local, splat-lab.jetson).
+
+## Status of each component
+
+| Component | State | Notes |
+|---|---|---|
+| nginx HTTP/HTTPS + isolation triple | ✅ ship-ready | both ports running, certs persistent |
+| live_stream.py daemon | ✅ ship-ready | systemd-ize next session for boot persistence |
+| Live RGB + YOLO11n overlay | ✅ ship-ready | TRT FP16 cache valid |
+| DAv2 depth stream | ✅ ship-ready | INFERNO LUT, 7 FPS |
+| tegrastats live telemetry | ✅ ship-ready | parsed in `live_stream.py` |
+| Live dashboard HTML | ✅ ship-ready | responsive grid, links to all scenes |
+| capture.py (one-shot) | ✅ ship-ready | atomic writes, resume-safe |
+| DA3-SMALL container (splat-lab:latest) | ✅ ship-ready | 15.5 GB image, reproducible Dockerfile |
+| DA3 inference (`bake.py` first half) | ✅ ship-ready | proven canary + multi-view |
+| Backproject → 3DGS PLY | ⚠️ valid PLY, **doesn't render in SuperSplat** | needs k-NN-init refactor |
+| annotate.py | ✅ ship-ready | works end-to-end, awaits viewable splat |
+| SuperSplat Viewer | ✅ ship-ready | proven with test cubes, awaits viewable splat |
+| Splat → browser walkthrough | ❌ blocked on k-NN-init | next session priority |
+
+`HANDOFF COMPLETE`

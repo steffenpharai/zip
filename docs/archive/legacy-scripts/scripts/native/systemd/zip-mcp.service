@@ -1,0 +1,42 @@
+[Unit]
+Description=ZIP Robot MCP Server (Model Context Protocol)
+After=network.target ros2.service
+Wants=network-online.target
+Requires=zip-vision.service
+
+[Service]
+Type=simple
+User=steffen
+Group=steffen
+WorkingDirectory=/home/steffen/Projects/Zip
+
+# Environment setup
+Environment="ROS_DOMAIN_ID=0"
+Environment="ROS_DISTRO=humble"
+Environment="PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/ros/humble/bin:/home/steffen/.local/bin"
+Environment="PYTHONUNBUFFERED=1"
+Environment="PYTHONPATH=/home/steffen/.local/lib/python3.10/site-packages:/usr/lib/python3.10/site-packages"
+Environment="MCP_SERVER_PORT=8769"
+Environment="MCP_SERVER_HOST=0.0.0.0"
+
+# Source ROS 2 and workspace
+ExecStartPre=/bin/bash -c 'source /opt/ros/humble/setup.bash; source /home/steffen/zip_ros2_ws/install/setup.bash'
+
+# Start MCP HTTP server
+ExecStart=/bin/bash -c 'source /opt/ros/humble/setup.bash; source /home/steffen/zip_ros2_ws/install/setup.bash; python3 -m zip_orchestration.mcp_http_server'
+
+# Restart policy
+Restart=on-failure
+RestartSec=10
+
+# Resource limits
+MemoryLimit=512M
+CPUQuota=200%
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=zip-mcp
+
+[Install]
+WantedBy=multi-user.target

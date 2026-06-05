@@ -1,0 +1,84 @@
+# splat-lab (host-side mirror of `zip@jetson:~/splat-lab/`)
+
+This folder mirrors what lives on the Jetson at `~/splat-lab/`. Edit here,
+`scp` to the Jetson to deploy. Read `REPORT.md` first — it's the session
+handoff and tells you what works, what's blocked, and what to do next.
+
+## Quick links
+
+- **`MISSION.md`** — agent brief / quality bar
+- **`REPORT.md`** — current state, measured numbers, known issues, next-session
+  plan (read this before doing anything)
+- **`Dockerfile.splat`** — derived from `dustynv/l4t-pytorch:r36.4.0`, adds
+  Depth Anything 3, gsplat 1.5.3, xformers + pycolmap stubs, torchvision
+  backup/restore around the pip install. Builds to `splat-lab:latest` (~15.5 GB).
+- **`launcher.sh`** — one-command end-to-end:
+  `./launcher.sh <scan_id> [duration_s] [max_views]`
+- **`live.html`** — the live RGB + DAv2 depth + YOLO + tegrastats dashboard.
+  Deployed at `~/splat-lab/scenes/index.html` on the Jetson, served by nginx
+  at `:8090/` (or `:8443/` HTTPS).
+- **`requirements.txt`** — host-side Python deps (no torch — that's in the
+  container)
+- **`scripts/`** — every Python script the pipeline uses
+
+## What does what
+
+| Script | Where it runs | Purpose |
+|---|---|---|
+| `live_stream.py` | host venv (perception-lab .venv) | aiohttp daemon serving RGB+depth+detections+health on :8092. Persistent via systemd unit `splat-lab-live.service`. |
+| `capture.py` | host venv | one-shot v4l2 capture + YOLO11n score-gate → keyframes + detections.jsonl |
+| `bake.py` | `splat-lab:latest` container | DA3-SMALL inference + backproject → 3DGS PLY + settings.json. **Currently produces a valid PLY that doesn't render — see REPORT.md** |
+| `annotate.py` | host venv | YOLO bboxes through DA3 extrinsics → world coords → SuperSplat hotspots in settings.json |
+| `da3_canary.py` | container | DA3 load + depth canary + multi-view timing |
+| `da3_infer.py` | container | Legacy DA3 wrapper kept for reference |
+| `train_gsplat.py` | container | Reserved for the proper k-NN-init bake.py rework (REPORT.md → "next session") |
+| `validate_ply.py` | anywhere | byte-level 3DGS PLY format validator |
+| `ws_reload.py` | host venv | aiohttp WebSocket broadcaster for atomic-file-reload pings |
+| `make_synthetic_ply.py` | anywhere | 5000-gaussian colored sphere (Day-1 smoke test) |
+| `make_huge_test_ply.py` | anywhere | 9-corner debug cube at origin (proves viewer works) |
+| `make_9_at_livedemo.py` | anywhere | 9-corner cube at livedemo bbox (camera-config sanity test) |
+| `make_hybrid_ply.py` | anywhere | livedemo positions + uniform white opaque (renders as dark silhouette — proved coplanar issue) |
+| `inspect_gs_output.py` | container | DA3 Prediction schema diagnostic |
+
+## Deploy to the Jetson
+
+```bash
+# from this folder, sync to ~/splat-lab/ on the Jetson
+rsync -av --delete --exclude=logs/ ./ zip-jetson:~/splat-lab/
+
+# or just scp a single file you edited
+scp scripts/bake.py zip-jetson:~/splat-lab/scripts/
+```
+
+## Open the live dashboard in your browser
+
+The Jetson serves on `192.168.55.1:8090` (USB-C) and `:8443` (HTTPS). For
+WebGPU you need a **secure context** — use an SSH tunnel to localhost:
+
+```bash
+# from VSCode / Claude Code: pick "jetson-splat" in the launch.json
+# OR run manually:
+ssh -L 8090:127.0.0.1:8090 -L 8443:127.0.0.1:8443 -N zip-jetson
+# then open http://localhost:8090/ in any Chromium
+```
+
+## What is and isn't shipping
+
+| | Status |
+|---|---|
+| Live RGB + YOLO + DAv2 depth + telemetry dashboard | ✅ ship-ready |
+| nginx HTTPS + isolation triple (COOP/COEP/CORP) | ✅ ship-ready |
+| DA3 inference container | ✅ ship-ready |
+| SuperSplat Viewer (verified with test cubes) | ✅ ship-ready |
+| Auto-annotation from YOLO11n | ✅ ship-ready (works on any viewable splat) |
+| **DA3 → browser-viewable splat** | ❌ blocked on k-NN-init refactor (REPORT.md) |
+
+## Related dirs
+
+- `C:\zip\jetson\` — zip-brain repo (the robot's Python brain — separate
+  concern; not part of splat-lab)
+- `C:\zip\jetson-containers\` — dusty-nv jetson-containers clone (used to
+  build `splat-lab:latest`)
+- `C:\zip\.claude\launch.json` — has the `jetson-splat` ssh-tunnel entry
+  that maps Windows `localhost:8090/8443` → Jetson, the only way Chrome
+  treats the dashboard as a secure context (WebGPU + SAB)

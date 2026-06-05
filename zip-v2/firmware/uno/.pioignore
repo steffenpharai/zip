@@ -1,0 +1,25 @@
+# PlatformIO build artifacts
+.pio/
+.vscode/
+
+# Compiled binaries
+*.hex
+*.elf
+*.bin
+*.a
+*.o
+
+# Build directories
+build/
+dist/
+
+# IDE files
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+

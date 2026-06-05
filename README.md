@@ -1,87 +1,56 @@
-# ZIP V2
+# Zip
 
-> An autonomous robot car you control from a browser. Drives around your house,
-> sees through two cameras, runs on a Jetson, looks like a fighter-jet cockpit.
+A small, layered AI system that lives in three places:
 
-## What this repo contains
+1. **[jarvis/](./jarvis)** — the AI friend, on a Jetson Orin Nano Super
+2. **[zip-v2/](./zip-v2)** — the autonomous robot it can drive when it's around
+3. **[zip-v1/](./zip-v1)** — the OpenAI-powered predecessor (archived reference)
 
-The **PC-side** half of ZIP V2: documentation, the operator-console HUD
-(Next.js), and the UNO + ESP32 firmware that ships on the robot. The
-**on-robot Python brain** lives in a sibling repo at
-[`steffenpharai/zip-brain`](https://github.com/steffenpharai/zip-brain),
-mounted here at [`/jetson`](./jetson) as a nested git repo (gitignored by the
-outer one so the two are deployable independently).
+## What's primary right now
 
-## Where to start as a human or an agent
+**[jarvis/](./jarvis)** — a *vision-first* agent on the Jetson. When the robot
+isn't around, Jarvis still sees the world through a Logitech C615 and runs
+local perception:
 
-| If you're… | Read first |
-| --- | --- |
-| New to the project | [`docs/v2/ARCHITECTURE.md`](./docs/v2/ARCHITECTURE.md) |
-| An agent picking up this work | [`AGENTS.md`](./AGENTS.md) |
-| Bringing the robot up from cold | [`docs/v2/DEPLOY.md`](./docs/v2/DEPLOY.md) |
-| Looking for what's done vs. next | [`docs/v2/PHASES.md`](./docs/v2/PHASES.md) |
-| Working on wire protocols | [`docs/v2/PROTOCOLS.md`](./docs/v2/PROTOCOLS.md) |
-| Hitting weird hardware behaviour | [`docs/v2/KNOWN_ISSUES.md`](./docs/v2/KNOWN_ISSUES.md) |
-| Modifying a specific layer | [`docs/v2/DEV_WORKFLOW.md`](./docs/v2/DEV_WORKFLOW.md) |
-| Working on the standalone Jetson AI agent ("Jarvis") | [`docs/jarvis/README.md`](./docs/jarvis/README.md) |
-| Looking for V1 (deprecated) | [`docs/archive/v1/`](./docs/archive/v1/) |
+- **[jarvis/depth-lab/](./jarvis/depth-lab)** — Depth Anything V2 Small on CUDA
+- **[jarvis/perception-lab/](./jarvis/perception-lab)** — YOLO11n TRT FP16
+- **[jarvis/splat-lab/](./jarvis/splat-lab)** — Depth Anything 3 → 3D Gaussian
+  Splat → SuperSplat viewer in the browser  *(🔄 WIP: black-render bug —
+  fix lives in `scripts/bake.py.knn-init-from-pc`, needs verification)*
+- **[jarvis/llm/](./jarvis/llm)** — ⏸️ planned future brain; OpenClaw + local
+  Qwen3-4B experiment installed but **not yet integrated** with the vision
+  stack (see RESEARCH_AND_DECISIONS.md for the strategic verdict)
 
-## Three-tier architecture
+## The robot, when it's around
 
-```
-PC / Web HUD  ←—WebSocket—→  Jetson Orin Nano Super  ←—UART—→  Arduino UNO
-   (operator                  ("zip-brain": camera,        (motor PWM,
-    console only)               agent, planner brain)        deadman safety)
-                                       │
-                                  Wi-Fi 5GHz
-                                       │
-                              ESP32-S3 OV2640 cam
-                              (independent stream)
-```
+**[zip-v2/](./zip-v2)** — an Elegoo Smart Car V4.0 chassis driven over Wi-Fi:
 
-Three iron rules:
+- **[zip-v2/hud/](./zip-v2/hud)** — Next.js cockpit on the PC
+- **[zip-v2/brain/](./zip-v2/brain)** — Python `zip_brain` on the Jetson
+  *(git submodule → [zip-brain](https://github.com/steffenpharai/zip-brain))*
+- **[zip-v2/firmware/](./zip-v2/firmware)** — UNO (ATmega328P) + ESP32-S3
+  camera bridge
 
-1. **UNO owns time.** PWM, slew, deadman — all on-MCU, never over the network.
-2. **Jetson owns intent.** Perception, planning, motion commands, voice. The
-   PC never closes a motor loop.
-3. **PC/web is an observability + control surface.** The robot keeps working
-   without the PC.
+Current phase: **5.3a** (depth + wheel safety lock). Wheels lock by default
+in desk mode; explicit `ZIP_MOTION_LOCKED=0` required to drive.
 
-See [`docs/v2/ARCHITECTURE.md`](./docs/v2/ARCHITECTURE.md) for the full
-diagram and rationale.
+## The predecessor
 
-## Quick start (assuming hardware is already paired)
+**[zip-v1/](./zip-v1)** — OpenAI voice control + ROS2 + cloud LLM, archived
+as the *predicate*. Full source preserved at the
+[`v1-archive`](https://github.com/steffenpharai/zip/tree/v1-archive) tag.
 
-```bash
-# On the PC: dev server for the HUD
-npm install
-npm run dev:local
-# → http://localhost:3000/v2
+## Three immovable rules
 
-# On the Jetson: the brain is a systemd service
-sudo systemctl status zip-brain        # already auto-starts
-sudo journalctl -u zip-brain -f        # follow logs
-```
+1. **UNO owns time** — PWM, motor slew, deadman watchdog. Never bypass.
+2. **UART is exactly 500000 baud** (UBRR=3 on ATmega328P @ 16 MHz).
+3. **Wheels locked by default** on the bench. Unlock explicitly.
 
-Cold-start from a freshly-flashed Jetson and unpaired hardware →
-[`docs/v2/DEPLOY.md`](./docs/v2/DEPLOY.md).
+## Quick links
 
-## What's working as of this snapshot
-
-- Phase 0–3 complete: clean firmware build pipeline, Jetson brain running
-  as a systemd service, full V2 HUD operator console, manual drive over
-  Wi-Fi/USB-C, **both cameras live** (Logitech C615 USB UVC + ESP32-S3
-  OV2640 over Wi-Fi).
-- Drive responsiveness: **~70 ms keydown→full-speed** (originally ~300 ms;
-  see [`docs/v2/PHASES.md`](./docs/v2/PHASES.md) for the optimization trail).
-
-## What's next
-
-Phase 4 (voice loop), Phase 5/6 (agent skeleton + LLM tool calling),
-Phase 7 (SLAM via MASt3R-SLAM). The phase plan and decisions are tracked
-in [`docs/v2/PHASES.md`](./docs/v2/PHASES.md) and
-[`docs/v2/ARCHITECTURE.md`](./docs/v2/ARCHITECTURE.md).
-
-## License
-
-The original V1 was MIT-licensed; V2 inherits the same.
+- **Constellation architecture:** [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)
+- **Roadmap (phases):** [docs/ROADMAP.md](./docs/ROADMAP.md)
+- **Hardware inventory:** [docs/HARDWARE.md](./docs/HARDWARE.md)
+- **Known issues:** [docs/KNOWN_ISSUES.md](./docs/KNOWN_ISSUES.md)
+- **Agent orientation:** [AGENTS.md](./AGENTS.md)
+- **Recent changes:** [CHANGELOG.md](./CHANGELOG.md)

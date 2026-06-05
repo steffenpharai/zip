@@ -1,7 +1,0 @@
-# Emergency Stop Service
-# Immediately stops all robot motion and enters safe state
-
----
-# Response
-bool success
-string message

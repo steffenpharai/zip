@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>splat-lab live · Orin Nano + C615</title>
+<style>
+  :root { color-scheme: dark; --fg:#e7e7ea; --dim:#8a8a90; --accent:#7af0c0; --warn:#f0c47a;
+          --bg:#0a0b0e; --panel:#13151a; --line:#1f2228; }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { height: 100%; }
+  body { font: 13px/1.45 ui-monospace, "SF Mono", Menlo, monospace;
+         background: var(--bg); color: var(--fg); padding: 14px; min-height: 100vh; }
+  header { display: flex; justify-content: space-between; align-items: baseline;
+           margin-bottom: 12px; }
+  h1 { font-size: 14px; font-weight: 600; letter-spacing: .02em; }
+  h1 .accent { color: var(--accent); }
+  .subtitle { color: var(--dim); font-size: 11px; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr;
+    grid-template-rows: auto auto;
+    gap: 12px;
+  }
+  @media (max-width: 1100px) { .grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 700px) { .grid { grid-template-columns: 1fr; } }
+
+  .panel { background: var(--panel); border: 1px solid var(--line);
+           border-radius: 6px; padding: 10px; min-width: 0; }
+  .panel h2 { font-size: 11px; font-weight: 600; color: var(--dim);
+              margin-bottom: 6px; text-transform: uppercase; letter-spacing: .06em; }
+  .panel h2 .tag { float: right; color: var(--accent); font-weight: 400; }
+
+  .stream { display: block; width: 100%; height: auto; background: #000;
+            border-radius: 3px; aspect-ratio: 16/9; object-fit: cover; }
+
+  .splat-frame { width: 100%; aspect-ratio: 4/3; border: 0; border-radius: 3px;
+                 background: #000; }
+
+  .row { display: flex; justify-content: space-between;
+         padding: 4px 0; border-bottom: 1px solid var(--line); font-size: 12px; }
+  .row:last-child { border-bottom: 0; }
+  .row .k { color: var(--dim); }
+  .row .v { color: var(--fg); }
+  .row .v.accent { color: var(--accent); font-weight: 600; }
+
+  .badge { display: inline-block; padding: 1px 8px; border-radius: 999px;
+           font-size: 10px; font-weight: 600; }
+  .badge.live { background: #14352b; color: #7af0c0; }
+  .badge.idle { background: #3a1a1a; color: #f07a7a; }
+
+  .scenes { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .scene { display: block; padding: 6px 8px; background: #1d2128;
+           border-radius: 3px; color: var(--fg); text-decoration: none; font-size: 11px; }
+  .scene:hover { background: #252a32; }
+  .scene .name { font-weight: 600; color: var(--accent); }
+  .scene .meta { color: var(--dim); font-size: 10px; }
+
+  .det { display: flex; align-items: center; gap: 6px; padding: 3px 0;
+         font-size: 12px; border-bottom: 1px solid var(--line); }
+  .det:last-child { border-bottom: 0; }
+  .det .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .det .lbl { flex-grow: 1; }
+  .det .conf { color: var(--dim); }
+
+  .meter { height: 4px; background: #0a0b0e; border-radius: 2px;
+           overflow: hidden; margin-top: 2px; }
+  .meter > div { height: 100%; background: var(--accent); transition: width .3s; }
+  .meter.warn > div { background: var(--warn); }
+
+  .bar-row { padding: 4px 0; border-bottom: 1px solid var(--line); }
+  .bar-row:last-child { border-bottom: 0; }
+  .bar-row .top { display: flex; justify-content: space-between; font-size: 11px; }
+  .bar-row .top .k { color: var(--dim); }
+
+  .pipeline { display: flex; gap: 4px; margin-top: 6px; flex-wrap: wrap; }
+  .step { padding: 2px 6px; background: #1d2128; border-radius: 3px;
+          font-size: 10px; color: var(--dim); }
+  .step.ok { color: var(--accent); border: 1px solid #2a4a3a; }
+
+  .col-span-2 { grid-column: span 2; }
+
+  .iframe-fallback { padding: 12px; color: var(--dim); font-size: 11px;
+                     background: #0a0b0e; border-radius: 3px; }
+  .iframe-fallback a { color: var(--accent); }
+
+  footer { color: var(--dim); margin-top: 14px; font-size: 10px; text-align: center; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>splat-lab <span class="accent">live</span></h1>
+  <div class="subtitle">
+    Jetson Orin Nano Super · JetPack 6.2 · MAXN_SUPER · 8 GB unified RAM
+  </div>
+</header>
+
+<div class="grid">
+
+  <!-- ROW 1 COL 1+2: live RGB stream -->
+  <div class="panel col-span-2">
+    <h2>
+      Live RGB · C615 + YOLO11n TRT FP16
+      <span class="tag" id="rgbTag">— FPS</span>
+    </h2>
+    <img id="cam" class="stream" src="/live/stream" alt="live RGB" />
+    <div class="pipeline">
+      <div class="step ok">v4l2 1280×720 MJPEG</div>
+      <div class="step ok">YOLO11n TRT FP16</div>
+      <div class="step ok">bbox overlay</div>
+      <div class="step ok">multipart MJPEG</div>
+    </div>
+  </div>
+
+  <!-- ROW 1 COL 3: state panel -->
+  <div class="panel">
+    <h2>State <span class="tag"><span id="stateBadge" class="badge idle">…</span></span></h2>
+    <div class="row"><span class="k">RGB FPS</span><span class="v accent" id="fpsRgb">—</span></div>
+    <div class="row"><span class="k">Depth FPS</span><span class="v accent" id="fpsDepth">—</span></div>
+    <div class="row"><span class="k">Frames</span><span class="v" id="frames">—</span></div>
+    <div class="row"><span class="k">Depth frames</span><span class="v" id="depthFrames">—</span></div>
+    <div class="row"><span class="k">Live detections</span><span class="v" id="ndet">—</span></div>
+    <div class="row"><span class="k">Uptime</span><span class="v" id="uptime">—</span></div>
+
+    <h2 style="margin-top:12px;">tegrastats <span class="tag" id="powerTag">— mW</span></h2>
+    <div class="bar-row">
+      <div class="top"><span class="k">RAM</span><span class="v" id="ramTxt">—</span></div>
+      <div class="meter" id="ramMeter"><div style="width:0"></div></div>
+    </div>
+    <div class="bar-row">
+      <div class="top"><span class="k">GPU</span><span class="v" id="gpuTxt">—</span></div>
+      <div class="meter" id="gpuMeter"><div style="width:0"></div></div>
+    </div>
+    <div class="bar-row">
+      <div class="top"><span class="k">CPU avg</span><span class="v" id="cpuTxt">—</span></div>
+      <div class="meter" id="cpuMeter"><div style="width:0"></div></div>
+    </div>
+  </div>
+
+  <!-- ROW 2 COL 1: depth stream -->
+  <div class="panel">
+    <h2>
+      DAv2 depth · INFERNO
+      <span class="tag" id="depthTag">— FPS</span>
+    </h2>
+    <img class="stream" src="/live/depth" alt="DAv2 depth stream" />
+    <div class="pipeline">
+      <div class="step ok">DAv2-S ONNX/CUDA</div>
+      <div class="step ok">518² inverse depth</div>
+      <div class="step ok">INFERNO LUT</div>
+    </div>
+  </div>
+
+  <!-- ROW 2 COL 2: embedded splat viewer -->
+  <div class="panel">
+    <h2>Latest 3D splat <span class="tag">DA3 · livedemo</span></h2>
+    <iframe class="splat-frame" src="/livedemo/?settings=./settings.json"
+            allow="xr-spatial-tracking; fullscreen"
+            allowfullscreen></iframe>
+    <div class="iframe-fallback">
+      iframe blocked in some headless previews. Open
+      <a href="/livedemo/" target="_blank">livedemo</a> /
+      <a href="/roomscan1/" target="_blank">roomscan1</a> in a fresh tab
+      for full WebGPU rendering.
+    </div>
+  </div>
+
+  <!-- ROW 2 COL 3: detections + scenes -->
+  <div class="panel">
+    <h2>Live detections</h2>
+    <div id="dets" style="min-height: 60px;">no detections yet…</div>
+
+    <h2 style="margin-top:12px;">Baked walkthroughs</h2>
+    <div class="scenes" id="scenes">
+      <a class="scene" href="/livedemo/" target="_blank">
+        <div class="name">livedemo →</div><div class="meta">DA3 · 4 views</div>
+      </a>
+      <a class="scene" href="/roomscan1/" target="_blank">
+        <div class="name">roomscan1 →</div><div class="meta">30 s pan · 47k</div>
+      </a>
+      <a class="scene" href="/smoketest/" target="_blank">
+        <div class="name">smoketest →</div><div class="meta">desk · 24k</div>
+      </a>
+      <a class="scene" href="/sample/" target="_blank">
+        <div class="name">sample →</div><div class="meta">synthetic</div>
+      </a>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  jetson@<span id="host"></span> · Apache 2.0 / MIT · YOLO11n TRT FP16 +
+  DAv2 Small ONNX/CUDA + DA3-SMALL bake + SuperSplat Viewer
+</footer>
+
+<script>
+const palette = {
+  "person":"#ff6b6b", "chair":"#7ac0f0", "bottle":"#f0c47a", "tv":"#f07ac0",
+  "laptop":"#7af0c0", "keyboard":"#c0f07a", "mouse":"#7a7af0", "cup":"#f07ac0",
+  "book":"#a0a0a0", "cell phone":"#f0707a"
+};
+const colorFor = (label) => palette[label] || ("#" + ((Math.abs(
+  label.split("").reduce((a,c)=>(a*31+c.charCodeAt(0))|0,0)) & 0xFFFFFF
+).toString(16).padStart(6,"0")));
+
+document.getElementById("host").innerText = location.host;
+
+const $ = (id) => document.getElementById(id);
+
+async function tick() {
+  try {
+    const [h, d] = await Promise.all([
+      fetch("/live/health").then(r => r.json()),
+      fetch("/live/detections").then(r => r.json()),
+    ]);
+    $("stateBadge").className = "badge " + (h.ok ? "live" : "idle");
+    $("stateBadge").innerText = h.ok ? "LIVE" : "OFFLINE";
+    $("fpsRgb").innerText = h.fps_rgb.toFixed(1);
+    $("fpsDepth").innerText = h.fps_depth.toFixed(1);
+    $("frames").innerText = h.frames;
+    $("depthFrames").innerText = h.depth_frames;
+    $("ndet").innerText = h.detection_count;
+    $("uptime").innerText = h.uptime_s + " s";
+    $("rgbTag").innerText = h.fps_rgb.toFixed(1) + " FPS";
+    $("depthTag").innerText = h.fps_depth.toFixed(1) + " FPS";
+
+    const t = h.tegrastats || {};
+    if (t.ram_used_mb) {
+      $("ramTxt").innerText = `${t.ram_used_mb} / ${t.ram_total_mb} MB`;
+      $("ramMeter").firstElementChild.style.width =
+        ((t.ram_used_mb / t.ram_total_mb) * 100).toFixed(1) + "%";
+    }
+    if (t.gpu_pct !== undefined) {
+      $("gpuTxt").innerText = t.gpu_pct + "%";
+      $("gpuMeter").firstElementChild.style.width = t.gpu_pct + "%";
+    }
+    if (t.cpu_avg !== undefined) {
+      $("cpuTxt").innerText = t.cpu_avg + "%";
+      $("cpuMeter").firstElementChild.style.width = t.cpu_avg + "%";
+    }
+    if (t.power_mw !== undefined) {
+      $("powerTag").innerText = (t.power_mw / 1000).toFixed(1) + " W";
+    }
+
+    // detections
+    const detsDiv = $("dets");
+    if (!d.detections.length) {
+      detsDiv.innerText = "no detections in current frame";
+    } else {
+      detsDiv.innerHTML = "";
+      const seen = {};
+      d.detections.forEach(x => seen[x.label] = (seen[x.label] || 0) + 1);
+      Object.entries(seen).sort((a,b) => b[1]-a[1]).forEach(([label, n]) => {
+        const row = document.createElement("div");
+        row.className = "det";
+        row.innerHTML = `<span class="dot" style="background:${colorFor(label)}"></span>` +
+                        `<span class="lbl">${label}</span><span class="conf">×${n}</span>`;
+        detsDiv.appendChild(row);
+      });
+    }
+  } catch (e) {
+    $("stateBadge").className = "badge idle";
+    $("stateBadge").innerText = "OFFLINE";
+  }
+}
+tick();
+setInterval(tick, 500);
+</script>
+</body>
+</html>
