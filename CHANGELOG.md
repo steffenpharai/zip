@@ -5,6 +5,21 @@ milestones. V1 history is preserved at the
 [`v1-archive`](https://github.com/steffenpharai/zip-v1-archive/tree/v1-archive)
 tag on `steffenpharai/zip-v1-archive`.
 
+## [Public-repo prep — remove startup/pitch framing] — 2026-06-19
+
+Repository went public. Removed the investor-/startup-facing material so
+the repo reads as an engineering project.
+
+- **Removed** `PITCH.md`, `docs/VISION.md`, `docs/TEAM.md`.
+- **Renamed** `docs/TRACTION.md` → `docs/STATUS.md` and stripped the
+  investor framing (capital-efficiency pitch, "compared to plan"
+  victory-lap wording, pilot/Year-2 roadmap projections), keeping the
+  measured performance numbers and shipped-capability tables.
+- **README** lost the "pitch in two paragraphs", the investor doc links,
+  the investor row in the documentation map, and the repository-map
+  entries for the deleted docs. The "private repo" hygiene note now
+  reflects the public repo.
+
 ## [Splat black-render resolved + gsplat refine + dashboard integration] — 2026-06-05
 
 The Jarvis `splat-lab` 3D-Gaussian-Splat pipeline went from "renders black in
@@ -42,10 +57,11 @@ All Apache-2.0 / MIT.
   camera baseline → DA3 ~monocular → thin 2.5D slab. A 1–2 m slow-walk capture
   is required for true 3D structure. Documented in `jarvis/splat-lab/REPORT.md`.
 
-## [Autonomous-dev configuration + investor-grade docs] — 2026-06-05
+## [Autonomous-dev configuration + docs pass] — 2026-06-05
 
-Set the repo up for end-to-end autonomous AI development and a real
-investor pitch.
+Set the repo up for end-to-end autonomous AI development and a full
+documentation pass. (The pitch/strategy docs added here were later
+removed; see the 2026-06-19 entry.)
 
 - **Autonomous-dev config (`.claude/`):** 4 project-specific subagents
   (`robot-tester`, `firmware-builder`, `splat-debugger`,
@@ -55,15 +71,12 @@ investor pitch.
   `drive-safety`), `settings.json` with 33-entry allowlist and
   destructive-op deny list (including the `ZIP_MOTION_LOCKED=0`
   pattern), comprehensive `.claude/README.md` indexing all of it.
-- **Investor-pitch quality docs:** `PITCH.md` (problem / solution /
-  why-now / why-us / traction / vision / ask),
-  `docs/VISION.md` (5-year thesis with year-by-year roadmap),
-  `docs/TRACTION.md` (every measured capability + perf number),
-  `docs/TEAM.md` (solo founder + AI-agent development model).
+- **Status + strategy docs:** added `docs/TRACTION.md` (every measured
+  capability + perf number; later renamed `docs/STATUS.md`) plus
+  pitch/vision/team docs that were removed on 2026-06-19.
 - **README upgrade:** mermaid system architecture diagram, mermaid
   Jarvis vision-pipeline diagram, mermaid phase-progression timeline.
-  Measured perf table, command catalog, doc-map by audience
-  (investor / engineer / operator / AI-agent / hardware).
+  Measured perf table, command catalog, doc-map by audience.
 - **GitHub repo metadata:** descriptions + topics refreshed on
   `steffenpharai/zip` (12 topics: robotics, jetson, arduino, nextjs,
   computer-vision, gaussian-splatting, autonomous-robot, edge-ai,
@@ -75,8 +88,7 @@ investor pitch.
 
 ## [Documentation professionalization pass] — 2026-06-05
 
-Bring the post-restructure repo up to "engineering AI team startup"
-quality. Private repo, but written as if ready for public view.
+Bring the post-restructure repo up to a clean, public-ready quality bar.
 
 - **Umbrella docs:** `docs/ARCHITECTURE.md` (full system picture with
   data ownership table), `docs/ROADMAP.md` (rolled-up phase tracking

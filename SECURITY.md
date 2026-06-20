@@ -1,8 +1,8 @@
 # Security policy
 
-Zip is a private repo. The maintainers take security seriously even at
-this scale because the project drives physical hardware — a bug here can
-mean an off-leash robot.
+Zip is a small project, but the maintainers take security seriously
+because it drives physical hardware — a bug here can mean an off-leash
+robot.
 
 ## Scope
 

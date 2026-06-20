@@ -7,6 +7,7 @@ Umbrella-level documentation for the [Zip repo](../README.md).
 - **[ARCHITECTURE.md](./ARCHITECTURE.md)** — the whole constellation in
   one picture
 - **[ROADMAP.md](./ROADMAP.md)** — rolled-up phases across Jarvis + Zip v2
+- **[STATUS.md](./STATUS.md)** — what's measured + shipped, with perf numbers
 - **[HARDWARE.md](./HARDWARE.md)** — inventory of every PCB, cable, mount
 - **[KNOWN_ISSUES.md](./KNOWN_ISSUES.md)** — gotchas that bit us once
 

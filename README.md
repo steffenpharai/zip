@@ -13,25 +13,20 @@
 
 ---
 
-## The pitch in two paragraphs
+## Overview
 
-The home/prosumer robot market is bifurcated: $300 Roombas that
-can't perceive, or $5k+ DIY platforms that require a PhD to wire up.
-**There is no "Arduino moment" for perceptive robots.** Zip fills
-that gap with a layered, edge-AI-first stack that ships with sensible
+Zip is a layered, edge-AI-first robotics stack that ships with sensible
 safety defaults out of the box.
 
 Vision runs on a $250 Jetson — depth, YOLO11 object detection, 3D
 Gaussian-splat reconstruction. Motor control runs on a deterministic
 $5 ATmega328P. The operator HUD runs in a browser. **Nothing
-phones home.** The architecture (UNO owns time → Jetson owns intent →
-PC is a window) scales to fleets without central-outage risk.
+phones home** — everything runs locally. The architecture (UNO owns
+time → Jetson owns intent → PC is a window) keeps safety provable at
+the chip level and each layer independently swappable.
 
-For investors: **[PITCH.md](./PITCH.md)** · **[VISION.md](./docs/VISION.md)** ·
-**[TRACTION.md](./docs/TRACTION.md)** · **[TEAM.md](./docs/TEAM.md)**
-
-For engineers: **[AGENTS.md](./AGENTS.md)** · **[ARCHITECTURE.md](./docs/ARCHITECTURE.md)** ·
-**[ADRs](./docs/adr/)**
+Start here: **[AGENTS.md](./AGENTS.md)** · **[ARCHITECTURE.md](./docs/ARCHITECTURE.md)** ·
+**[ADRs](./docs/adr/)** · **[STATUS.md](./docs/STATUS.md)**
 
 ---
 
@@ -172,7 +167,7 @@ timeline
 ```
 
 **Current phase: 5.3a shipped.** See [`docs/ROADMAP.md`](./docs/ROADMAP.md)
-and [`docs/TRACTION.md`](./docs/TRACTION.md) for detail.
+and [`docs/STATUS.md`](./docs/STATUS.md) for detail.
 
 ---
 
@@ -190,7 +185,7 @@ and [`docs/TRACTION.md`](./docs/TRACTION.md) for detail.
 | Live dashboard (RGB+depth+YOLO concurrent) | 6.7 FPS each | 16.2 W total, 4.3/7.6 GB RAM |
 | Brain restart (full) | ~5 s | systemd Restart=on-failure |
 
-Full numbers in [`docs/TRACTION.md`](./docs/TRACTION.md).
+Full numbers in [`docs/STATUS.md`](./docs/STATUS.md).
 
 ---
 
@@ -255,14 +250,11 @@ zip/
 │   ├── HARDWARE.md        BOM, pinouts, network/power topology
 │   ├── KNOWN_ISSUES.md    every gotcha that bit us once
 │   ├── GLOSSARY.md        terminology
-│   ├── VISION.md          5-year thesis
-│   ├── TRACTION.md        what's measured + shipped
-│   ├── TEAM.md            autonomous-AI development model
+│   ├── STATUS.md          what's measured + shipped
 │   └── adr/               7 Architecture Decision Records
 ├── .claude/               autonomous-dev configuration
 ├── .github/               workflows + templates + CODEOWNERS
 ├── README.md              this file
-├── PITCH.md               investor-facing pitch
 ├── AGENTS.md              orientation for AI agents
 ├── CONTRIBUTING.md        how to contribute
 ├── SECURITY.md            security policy
@@ -307,7 +299,6 @@ For a fresh Jetson cold-start, see [`zip-v2/docs/DEPLOY.md`](./zip-v2/docs/DEPLO
 
 | For | Read |
 |---|---|
-| **Investor / strategic partner** | [`PITCH.md`](./PITCH.md) → [`docs/VISION.md`](./docs/VISION.md) → [`docs/TRACTION.md`](./docs/TRACTION.md) → [`docs/TEAM.md`](./docs/TEAM.md) |
 | **Engineer joining the project** | [`AGENTS.md`](./AGENTS.md) → [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) → [`docs/adr/`](./docs/adr/) → [`CONTRIBUTING.md`](./CONTRIBUTING.md) |
 | **Operator (running the system)** | [`README.md`](./README.md) (this) → [`zip-v2/docs/DEPLOY.md`](./zip-v2/docs/DEPLOY.md) → [`docs/KNOWN_ISSUES.md`](./docs/KNOWN_ISSUES.md) |
 | **AI agent (Claude / Codex / Cursor)** | [`AGENTS.md`](./AGENTS.md) → [`.claude/README.md`](./.claude/README.md) → component `CLAUDE.md` |
@@ -317,8 +308,8 @@ For a fresh Jetson cold-start, see [`zip-v2/docs/DEPLOY.md`](./zip-v2/docs/DEPLO
 
 ## Repository hygiene
 
-- **Private repo, written as if public.** No secrets in tree, every
-  decision tracked as an ADR, AI-agent affordances documented.
+- **No secrets in tree**, every decision tracked as an ADR, AI-agent
+  affordances documented.
 - **Conventional-ish commits** — see [CONTRIBUTING.md](./CONTRIBUTING.md).
 - **CI** on every PR — typecheck + build (HUD), PlatformIO build (UNO
   + ESP32), markdown link check.

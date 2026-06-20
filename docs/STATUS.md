@@ -1,8 +1,6 @@
-# Traction
+# Project status
 
 What has been built and measured. **Last updated: 2026-06-05.**
-
-> "Show me the screenshots, not the slideware."
 
 ## Capabilities shipped
 
@@ -70,7 +68,7 @@ What has been built and measured. **Last updated: 2026-06-05.**
 (Browser walkthrough quality currently blocked by k-NN init fix; once
 verified, end-to-end UX is ~40 s for a viewable scan.)
 
-## Hardware traction
+## Hardware status
 
 | Asset | Status |
 |---|---|
@@ -87,7 +85,7 @@ verified, end-to-end UX is ~40 s for a viewable scan.)
 | Permanent camera mount geometry | 🔄 Open hardware task |
 | Wheel encoders | ⏸️ Future (would replace dead-reckoning) |
 
-## Repository / code traction
+## Repository / code
 
 | Metric | Value |
 |---|---|
@@ -102,7 +100,7 @@ verified, end-to-end UX is ~40 s for a viewable scan.)
 | Reusable skills | 2 (autonomous-dev, drive-safety) |
 | Permission allowlist entries | 33 pre-authorized read-only / build ops |
 
-## Test traction (and gaps)
+## Tests (and gaps)
 
 | Test | Status |
 |---|---|
@@ -119,7 +117,7 @@ verified, end-to-end UX is ~40 s for a viewable scan.)
 
 The test gap is real and prioritized for the next dev cycle.
 
-## Documentation traction
+## Documentation status
 
 | Doc | Status |
 |---|---|
@@ -129,7 +127,7 @@ The test gap is real and prioritized for the next dev cycle.
 | zip-v2/docs/ (PROTOCOLS, DEPLOY, DEV_WORKFLOW, JETSON_FACTS, PHASES, PHASE5_PLAN) | ✅ |
 | jarvis/ READMEs + per-lab READMEs | ✅ |
 | .claude/ autonomous dev setup | ✅ |
-| PITCH.md + VISION.md + TRACTION.md (this file) + TEAM.md | ✅ |
+| docs/STATUS.md (this file) | ✅ |
 
 ## What's NOT shipping yet (named honestly)
 
@@ -147,30 +145,23 @@ The test gap is real and prioritized for the next dev cycle.
   planner only uses bow.
 - **Custom hardware (PCB, mount, power).** Open hardware tasks; will
   ship as a dedicated phase.
-- **Pilot deployments.** Robot lives on a desk. Real-home pilots are
-  Year 2.
 
 ## Compared to plan
 
 The original V2 plan (Phase 0 → 7) called for shipping through Phase
-5.3a by mid-2026. **We are on the plan.** Phase 5.3a (depth + wheel
-safety lock) landed 2026-06-03. The restructure + professionalization
-pass landed 2026-06-04 → 2026-06-05.
+5.3a by mid-2026, and that landed on schedule. Phase 5.3a (depth +
+wheel safety lock) landed 2026-06-03. The monorepo restructure landed
+2026-06-04 → 2026-06-05.
 
 The Jarvis vision-first labs were not in the original plan — they
 emerged in parallel because the same Jetson hardware serves both. The
 splat reconstruction is the most ambitious not-yet-shipping piece;
-once the k-NN fix verifies, that becomes a major capability
-differentiator.
+once the k-NN fix verifies, that becomes a major capability.
 
-## Capital efficiency
+## Cost & dependencies
 
-Bill of materials shipped to date: well under $1k of hardware (one
-robot, one Jetson, one camera, mounts, cables). No external
-infrastructure dependencies (no AWS, no GCP, no third-party APIs in
-the runtime). No subscription costs to run.
-
-This is the unit economics story we'll be able to tell at scale: the
-hardware is cheap because we picked it carefully, the software runs
-locally so there's no per-user cloud cost, and the dev velocity is
-high because the architecture is clean.
+Bill of materials to date: well under $1k of hardware (one robot, one
+Jetson, one camera, mounts, cables). No external infrastructure
+dependencies — no AWS, no GCP, no third-party APIs in the runtime, no
+subscription costs to run. Everything executes locally on the Jetson,
+the MCU, and the operator PC.

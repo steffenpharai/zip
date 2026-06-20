@@ -1,7 +1,7 @@
 # docs/images/
 
-This directory holds visual assets referenced from the README, PITCH,
-VISION, and other docs.
+This directory holds visual assets referenced from the README and
+other docs.
 
 ## Current state
 
@@ -14,7 +14,7 @@ in sync with the code (vs. PNG screenshots that go stale).
 - **Screenshots** of the running HUD, the live dashboard, the
   SuperSplat browser walk-through. These can't be Mermaid-generated.
 - **Photos** of the physical robot (chassis, Jetson mount, camera
-  mount) for `docs/HARDWARE.md` and `PITCH.md`.
+  mount) for `docs/HARDWARE.md`.
 - **Architecture diagrams** that are too complex for Mermaid syntax
   (e.g., timing diagrams, oscilloscope captures).
 - **Branding assets** if/when a logo lands.
@@ -28,7 +28,7 @@ in sync with the code (vs. PNG screenshots that go stale).
 Examples:
 
 - `readme-hud-cockpit-r1.png`
-- `pitch-system-overview-r2.svg`
+- `readme-system-overview-r2.svg`
 - `hardware-chassis-mount-r1.jpg`
 
 Use SVG when possible (sharp at all sizes, smaller file size, often
@@ -49,12 +49,12 @@ for an interactive preview.
 
 When the splat black-render fix verifies, add:
 
-- `pitch-splat-render-r1.png` — first successful browser splat
-  walk-through, to replace the "WIP" badge in PITCH/README.
+- `readme-splat-render-r1.png` — first successful browser splat
+  walk-through, to replace the "WIP" badge in the README.
 
 When Phase 6 lands:
 
-- `pitch-anchored-objects-r1.png` — HUD showing detected objects
+- `readme-anchored-objects-r1.png` — HUD showing detected objects
   pinned to map cells.
 
 When custom hardware lands:
