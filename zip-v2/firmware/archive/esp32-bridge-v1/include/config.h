@@ -19,7 +19,7 @@
 
 // AP password (empty string "" = open network)
 #ifndef WIFI_PASSWORD
-#define WIFI_PASSWORD           "zip12345"
+#define WIFI_PASSWORD           "CHANGE_ME"   // set your own AP password
 #endif
 
 // WiFi channel (1-13, default 1)
