@@ -31,8 +31,7 @@
 - **Development model.** Autonomous AI agents drive the dev loop:
   Claude Code with project-specific subagents and slash commands. A
   solo developer ships at small-team velocity.
-- **Ask.** [Fill in: seed / pre-seed / angel / strategic — depends on
-  the conversation. See `docs/VISION.md` for the long-form why.]
+- **Status.** Active development.
 
 ---
 
@@ -273,18 +272,13 @@ Headline next steps:
 
 ---
 
-## Ask
+## Status
 
-[Fill in based on conversation. Likely framings:]
+Active development.
 
-- **Pre-seed angel ($250 k - $1 M):** runway to hire 1 ML engineer +
-  1 hardware engineer, ship the hybrid LLM brain + skill SDK,
-  prototype the custom PCB.
-- **Seed ($2-5 M):** add a 3-5 person team, run pilots in 10-50 homes,
-  build the developer community, design the manufacturing path.
 - **Strategic (vertical partner):** if you're an iRobot / Anker /
   educational-robotics / home-security player and want to white-label
-  or acquire the AI-native layer.
+  or partner on the AI-native layer.
 
 The platform is private but **the architecture is publishable** —
 everything load-bearing is in `docs/` with rationale. We can give a
